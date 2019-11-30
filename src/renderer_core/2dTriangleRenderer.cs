@@ -28,7 +28,7 @@ namespace renderer._2d
             this.Width = width;
             this.Height = height;
             this.Scene = triangleIndexData;
-            imageBuffer = new Color[width * height];
+            imageBuffer = Enumerable.Repeat(Color.Red, Width * Height).ToArray();
             depthBuffer = Enumerable.Repeat(1.0, Width * Height).ToArray();
 
         }
@@ -64,41 +64,39 @@ namespace renderer._2d
 
                        Console.WriteLine($"{minx},{miny}    {maxx},{maxy}");
 
-                       Enumerable.Range((int)minx, (int)(maxx - minx)).ToList().ForEach(x =>
-                       {
-                           Console.WriteLine(x);
+                       Enumerable.Range((int)minx, (int)(maxx - minx) + 1).ToList().ForEach(x =>
+                         {
 
-                           Enumerable.Range((int)miny, (int)(maxy - miny)).ToList().ForEach(y =>
-                           {
-                               Console.WriteLine(y);
-                               var IsInsideTriangle = pixelIsInsideTriangle(x, y, tri, VertexData);
+                             Enumerable.Range((int)miny, (int)(maxy - miny) + 1).ToList().ForEach(y =>
+                             {
+                                 var IsInsideTriangle = pixelIsInsideTriangle(x, y, tri, VertexData);
 
-                               var bary = TriangleExtensions.BaryCoordinates(x, y, tri, Verts2d);
-                               var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
+                                 var bary = TriangleExtensions.BaryCoordinates(x, y, tri, Verts2d);
+                                 var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
 
-                               var AB = Vector3.Subtract(A, B);
-                               var AC = Vector3.Subtract(A, C);
-                               var ABXAC = Vector3.Normalize(Vector3.Cross(AB, AC));
+                                 var AB = Vector3.Subtract(A, B);
+                                 var AC = Vector3.Subtract(A, C);
+                                 var ABXAC = Vector3.Normalize(Vector3.Cross(AB, AC));
 
 
-                               if (IsInsideTriangle)
-                               {
-                                   var flatIndex = Width * (int)y + (int)x;
+                                 if (IsInsideTriangle)
+                                 {
+                                     var flatIndex = Width * (int)y + (int)x;
                                    //don't draw unless we are within bounds
                                    //don't draw if something is already in the depth buffer for this pixel.
-                                   if (flatIndex <= imageBuffer.Length && flatIndex > -1 && z < depthBuffer[flatIndex])
-                                   {
+                                   if (flatIndex <= imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
+                                     {
                                        //adjust color here.
-                                       var diffuseCoef = (float)(Math.Max(Vector3.Dot(ABXAC, new Vector3(1.0f, 0f, 0f)), 0.2));
+                                       var diffuseCoef = (float)(Math.Max(Vector3.Dot(ABXAC, new Vector3(1.0f, 0f, 0f)), 0.5));
 
 
-                                       imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * 255), (int)(diffuseCoef * 255), (int)(diffuseCoef * 255));
-                                       depthBuffer[flatIndex] = z;
+                                         imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * 255), (int)(diffuseCoef * 255), (int)(diffuseCoef * 255));
+                                         depthBuffer[flatIndex] = z;
 
-                                   }
-                               }
-                           });
-                       });
+                                     }
+                                 }
+                             });
+                         });
 
                    });
                });
@@ -114,10 +112,11 @@ namespace renderer._2d
 
             var barycenter = TriangleExtensions.BaryCoordinates(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
             //only in the triangle if coefs are all positive.
-            if (barycenter.X >= 0.0 && barycenter.Y >= 0.0 && barycenter.Z >= 0.0)
+            if (barycenter.X >= 0.0 && barycenter.X <= 1.0 && barycenter.Y >= 0.0 && barycenter.Y <= 1.0 && barycenter.Z >= 0.0 && barycenter.Z <= 1.0)
             {
                 return true;
             }
+
             return false;
         }
 

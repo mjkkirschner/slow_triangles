@@ -6,9 +6,14 @@ namespace renderer.utilities
 
     public static class Vector3Extensions
     {
-        public static Vector3 ToVector3(this Vector2 vec)
+        /// <summary>Converts to a vector3 struct - Z is set to 0 by default
+        /// 
+        /// </summary>
+        /// <param name="vec"></param>
+        /// <returns></returns>
+        public static Vector3 ToVector3(this Vector2 vec, float Z = 0f)
         {
-            return new Vector3(vec.X, vec.Y, 1.0f);
+            return new Vector3(vec.X, vec.Y, Z);
         }
 
         public static Vector2 ToVector2(this Vector3 vec)
