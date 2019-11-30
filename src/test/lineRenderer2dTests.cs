@@ -5,7 +5,7 @@ using System.Linq;
 using System.Numerics;
 using NUnit.Framework;
 using renderer.core;
-using renderer.line;
+using renderer._2d;
 
 namespace Tests
 {

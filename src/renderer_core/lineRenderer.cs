@@ -6,7 +6,7 @@ using System.Numerics;
 using System;
 using System.Linq;
 
-namespace renderer.line
+namespace renderer._2d
 {
 
     /// <summary>

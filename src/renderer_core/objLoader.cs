@@ -4,19 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using renderer.interfaces;
 
 namespace renderer.core
 {
 
-    public struct triangleFace
-    {
-        public int[] indexList;
-
-        public triangleFace(int[] inds)
-        {
-            this.indexList = inds;
-        }
-    }
 
     public static class ObjFileLoader
     {
@@ -52,11 +44,11 @@ namespace renderer.core
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public static List<triangleFace> LoadTrisFromObjAtPath(FileInfo path)
+        public static List<TriangleFace> LoadTrisFromObjAtPath(FileInfo path)
         {
             var text = File.ReadAllText(path.FullName);
             var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-            var output = new List<triangleFace>();
+            var output = new List<TriangleFace>();
             foreach (var line in lines)
             {
                 var split = line.Split(' ');
@@ -68,7 +60,7 @@ namespace renderer.core
                 var b = int.Parse(split[2]);
                 var c = int.Parse(split[3]);
 
-                output.Add(new triangleFace(new int[3] { a, b, c }));
+                output.Add(new TriangleFace(new int[3] { a, b, c }));
 
             }
             return output;
