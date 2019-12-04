@@ -5,15 +5,7 @@ using renderer.core;
 namespace renderer.interfaces
 {
 
-    public struct TriangleFace
-    {
-        public int[] indexList;
 
-        public TriangleFace(int[] inds)
-        {
-            this.indexList = inds;
-        }
-    }
     public interface IRenderer<T>
     {
         /// <summary>

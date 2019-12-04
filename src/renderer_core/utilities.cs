@@ -1,4 +1,6 @@
+using System;
 using System.Numerics;
+using renderer.dataStructures;
 using renderer.interfaces;
 
 namespace renderer.utilities
@@ -32,31 +34,37 @@ namespace renderer.utilities
             var b = triPt2;
             var c = triPt3;
 
+
+
             var ab = Vector2.Subtract(a, b).ToVector3();
             var bc = Vector2.Subtract(b, c).ToVector3();
             var bp = Vector2.Subtract(b, p).ToVector3();
             var cp = Vector2.Subtract(c, p).ToVector3();
             var ac = Vector2.Subtract(a, c).ToVector3();
 
+            var ca = Vector2.Subtract(c, a).ToVector3();
+            var ba = Vector2.Subtract(b, a).ToVector3();
+            var ap = Vector2.Subtract(a, p).ToVector3();
 
-            var areaABC = Vector3.Cross(ab, bc).Length() * .5f;
-            var areaABP = Vector3.Cross(ab, bp).Length() * .5f;
-            var areaACP = Vector3.Cross(ac, cp).Length() * .5f;
-            var areaBCP = Vector3.Cross(bc, cp).Length() * .5f;
+            var u = Vector3.Cross(new Vector3(ca.X, ba.X, ap.X), new Vector3(ca.Y, ba.Y, ap.Y));
+            if (System.Math.Abs(u.Z) < .0001f)
+            {
+                return new Vector3(-1, 1, 1);
+            }
 
             var bary = new Vector3();
-            bary.X = areaBCP / areaABC; // alpha
-            bary.Y = areaACP / areaABC; // beta
-            bary.Z = 1.0f - bary.X - bary.Y; // gamma
+            bary.X = (1.0f - (u.X + u.Y) / u.Z);
+            bary.Y = u.Y / u.Z;
+            bary.Z = u.X / u.Z;
 
             return bary;
         }
 
         public static Vector3 BaryCoordinates(int x, int y, TriangleFace triangle, Vector2[] vectors)
         {
-            var pt1 = vectors[triangle.indexList[0] - 1];
-            var pt2 = vectors[triangle.indexList[1] - 1];
-            var pt3 = vectors[triangle.indexList[2] - 1];
+            var pt1 = vectors[triangle.vertIndexList[0] - 1];
+            var pt2 = vectors[triangle.vertIndexList[1] - 1];
+            var pt3 = vectors[triangle.vertIndexList[2] - 1];
             return BaryCoordinates(x, y, pt1, pt2, pt3);
         }
     }
