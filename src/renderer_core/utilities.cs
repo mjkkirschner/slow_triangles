@@ -60,12 +60,55 @@ namespace renderer.utilities
             return bary;
         }
 
+        public static Vector3 BaryCoordinates2(int x, int y, Vector2 triPt1, Vector2 triPt2, Vector2 triPt3)
+        {
+            var p = new Vector2(x, y);
+            var a = triPt1;
+            var b = triPt2;
+            var c = triPt3;
+
+            //for normal calc
+            var edge1 = Vector2.Subtract(b, a).ToVector3();
+            var edge2 = Vector2.Subtract(c, a).ToVector3();
+
+            //for bary centric calc of sub triangle area.
+            var edge3 = Vector2.Subtract(a, c).ToVector3();
+            var edge4 = Vector2.Subtract(c, b).ToVector3();
+
+            var edgePB = Vector2.Subtract(p, b).ToVector3();
+            var edgePC = Vector2.Subtract(p, c).ToVector3();
+
+            var triNormal = Vector3.Cross(edge1, edge2);
+            var area = triNormal.Length() / 2.0f;
+
+
+
+            var temp1 = Vector3.Cross(edge3, edgePC);
+            var temp2 = Vector3.Cross(edge4, edgePB);
+            //need to compute area using dot product instead of ( temp1.length *.5 ) to get signed areas.
+            //which we need to get proper bary coordinates for points outside the triangle.
+            var u = (float)((Vector3.Dot(temp1, Vector3.Normalize(triNormal)) * .5) / area);
+            var v = (float)((Vector3.Dot(temp2, Vector3.Normalize(triNormal)) * .5) / area);
+            var total = ((1.0f - u - v) + u + v);
+
+            return new Vector3((1.0f - u - v), u, v);
+
+        }
+
         public static Vector3 BaryCoordinates(int x, int y, TriangleFace triangle, Vector2[] vectors)
         {
             var pt1 = vectors[triangle.vertIndexList[0] - 1];
             var pt2 = vectors[triangle.vertIndexList[1] - 1];
             var pt3 = vectors[triangle.vertIndexList[2] - 1];
             return BaryCoordinates(x, y, pt1, pt2, pt3);
+        }
+
+        public static Vector3 BaryCoordinates2(int x, int y, TriangleFace triangle, Vector2[] vectors)
+        {
+            var pt1 = vectors[triangle.vertIndexList[0] - 1];
+            var pt2 = vectors[triangle.vertIndexList[1] - 1];
+            var pt3 = vectors[triangle.vertIndexList[2] - 1];
+            return BaryCoordinates2(x, y, pt1, pt2, pt3);
         }
     }
 }

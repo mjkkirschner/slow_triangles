@@ -77,7 +77,7 @@ namespace renderer._2d
                              {
                                  var IsInsideTriangle = pixelIsInsideTriangle(x, y, tri, VertexData);
 
-                                 var bary = TriangleExtensions.BaryCoordinates(x, y, tri, Verts2d);
+                                 var bary = TriangleExtensions.BaryCoordinates2(x, y, tri, Verts2d);
                                  //compute the depth of current pixel.
                                  var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
                                 
@@ -127,7 +127,7 @@ namespace renderer._2d
             var pt2 = vectors[triangle.vertIndexList[1] - 1];
             var pt3 = vectors[triangle.vertIndexList[2] - 1];
 
-            var barycenter = TriangleExtensions.BaryCoordinates(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
+            var barycenter = TriangleExtensions.BaryCoordinates2(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
             //only in the triangle if coefs are all positive.
             if (barycenter.X < 0 || barycenter.Y < 0 || barycenter.Z < 0)
             {
