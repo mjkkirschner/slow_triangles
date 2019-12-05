@@ -68,7 +68,7 @@ namespace renderer._2d
                        var random = new Random();
                        var randomint = random.Next(255);
                        var randomint2 = random.Next(255);
-                       var randomint3= random.Next(255);
+                       var randomint3 = random.Next(255);
 
                        Enumerable.Range((int)minx, (int)(maxx - minx) + 2).ToList().ForEach(x =>
                          {
@@ -80,7 +80,7 @@ namespace renderer._2d
                                  var bary = TriangleExtensions.BaryCoordinates2(x, y, tri, Verts2d);
                                  //compute the depth of current pixel.
                                  var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
-                                
+
 
                                  var AB = Vector3.Subtract(A, B);
                                  var AC = Vector3.Subtract(A, C);
@@ -129,11 +129,11 @@ namespace renderer._2d
 
             var barycenter = TriangleExtensions.BaryCoordinates2(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
             //only in the triangle if coefs are all positive.
-            if (barycenter.X < 0 || barycenter.Y < 0 || barycenter.Z < 0)
+           
+            if (barycenter.X < 0 || barycenter.X >= 1f || barycenter.Y < 0 || barycenter.Y >= 1f || barycenter.Z < 0 || barycenter.Z >= 1f)
             {
                 return false;
             }
-
             return true;
         }
 

@@ -74,24 +74,28 @@ namespace renderer.utilities
             //for bary centric calc of sub triangle area.
             var edge3 = Vector2.Subtract(a, c).ToVector3();
             var edge4 = Vector2.Subtract(c, b).ToVector3();
+            var edge5 = Vector2.Subtract(b, a).ToVector3();
+
 
             var edgePB = Vector2.Subtract(p, b).ToVector3();
             var edgePC = Vector2.Subtract(p, c).ToVector3();
+            var edgePA = Vector2.Subtract(p, a).ToVector3();
 
             var triNormal = Vector3.Cross(edge1, edge2);
-            var area = triNormal.Length() / 2.0f;
+            var area = triNormal.Z/2f;
 
-
+            //NOT WORKING.....sad.... not sure why
+            //the normalized areas should add up to more than 1, but they don't.... !!odd.
 
             var temp1 = Vector3.Cross(edge3, edgePC);
             var temp2 = Vector3.Cross(edge4, edgePB);
-            //need to compute area using dot product instead of ( temp1.length *.5 ) to get signed areas.
-            //which we need to get proper bary coordinates for points outside the triangle.
-            var u = (float)((Vector3.Dot(temp1, Vector3.Normalize(triNormal)) * .5) / area);
-            var v = (float)((Vector3.Dot(temp2, Vector3.Normalize(triNormal)) * .5) / area);
-            var total = ((1.0f - u - v) + u + v);
+            var temp3 = Vector3.Cross(edge5, edgePA);
+            
+            var u = (temp1.Z/2f) / area;
+            var v = (temp2.Z/2f) / area;
+            var w = (temp3.Z/2f) / area;
 
-            return new Vector3((1.0f - u - v), u, v);
+            return new Vector3(w, u, v);
 
         }
 
