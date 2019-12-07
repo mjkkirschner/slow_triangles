@@ -34,17 +34,28 @@ namespace renderer.dataStructures
 
     public class Shader
     {
-        Vector3 varying_intensity;
+        public Vector3 LightDirection = new Vector3(0, -1, 0);
+        float[] varying_intensity = new float[3];
         public virtual Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
-            var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex]];
-            var currentUV = mesh.VertexUVData[mesh.Triangles[triangleIndex].UVIndexList[vertIndex]];
+            var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];
+            var currentUV = mesh.VertexUVData[mesh.Triangles[triangleIndex].UVIndexList[vertIndex] - 1];
+            var currentNormal = mesh.VertexNormalData[mesh.Triangles[triangleIndex].NormalIndexList[vertIndex] - 1];
+
+            //dot normal*light = intensity for vert.
+            varying_intensity[vertIndex] = System.Math.Max(0, Vector3.Dot(currentNormal, LightDirection));
+
+            //we don't do any projection in this shader
             return new Vector3(currentVert.X, currentVert.Y, currentVert.Z);
         }
 
 
-        public virtual bool FragmentToRaster(Vector3 baryCoords, Color color)
+        public virtual bool FragmentToRaster(Vector3 baryCoords, ref Color color)
         {
+            var varying_vector = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
+            var intensity = Vector3.Dot(varying_vector, baryCoords);
+            var channel = (int)(255 * intensity);
+            color = Color.FromArgb(channel, channel, channel);
             return true;
         }
     }
@@ -57,10 +68,10 @@ namespace renderer.dataStructures
     }
 
     /// <summary>
-    /// A bag for data and materials which specify how to render them.
+    /// A bag for data and materials which specify how to render that data.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Renderable<T>
+    public class Renderable<T> where T : Mesh
     {
         public T RenderableObject { get; set; }
         public Material material { get; set; }
@@ -69,6 +80,15 @@ namespace renderer.dataStructures
             this.RenderableObject = data;
             this.material = material;
         }
+
+        /* proposed interface
+       public Color[] Render()
+       {
+
+       }
+
+       public interpolateCoord Vector 3 (x,y)
+       */
     }
 
     public class Mesh

@@ -65,17 +65,12 @@ namespace renderer._2d
 
                        Console.WriteLine($"{minx},{miny}    {maxx},{maxy}");
 
-                       var random = new Random();
-                       var randomint = random.Next(255);
-                       var randomint2 = random.Next(255);
-                       var randomint3 = random.Next(255);
-
                        Enumerable.Range((int)minx, (int)(maxx - minx) + 2).ToList().ForEach(x =>
                          {
 
                              Enumerable.Range((int)miny, (int)(maxy - miny) + 2).ToList().ForEach(y =>
                              {
-                                 var IsInsideTriangle = pixelIsInsideTriangle(x, y, tri, VertexData);
+                                 var IsInsideTriangle = TriangleExtensions.pixelIsInsideTriangle(x, y, tri, VertexData);
 
                                  var bary = TriangleExtensions.BaryCoordinates2(x, y, tri, Verts2d);
                                  //compute the depth of current pixel.
@@ -107,7 +102,7 @@ namespace renderer._2d
                                              //don't draw pixels which are facing directly away from camera.
 
 
-                                             imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * randomint), (int)(diffuseCoef * randomint2), (int)(diffuseCoef * randomint3));
+                                             imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * 255), (int)(diffuseCoef * 255), (int)(diffuseCoef * 255));
                                              depthBuffer[flatIndex] = z;
                                          }
                                      }
@@ -120,25 +115,6 @@ namespace renderer._2d
 
             return imageBuffer;
         }
-
-        private static bool pixelIsInsideTriangle(int x, int y, TriangleFace triangle, Vector3[] vectors)
-        {
-            var pt1 = vectors[triangle.vertIndexList[0] - 1];
-            var pt2 = vectors[triangle.vertIndexList[1] - 1];
-            var pt3 = vectors[triangle.vertIndexList[2] - 1];
-
-            var barycenter = TriangleExtensions.BaryCoordinates2(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
-            //only in the triangle if coefs are all positive.
-           
-            if (barycenter.X < 0 || barycenter.X >= 1f || barycenter.Y < 0 || barycenter.Y >= 1f || barycenter.Z < 0 || barycenter.Z >= 1f)
-            {
-                return false;
-            }
-            return true;
-        }
-
-
-
     }
 
 }

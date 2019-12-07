@@ -102,7 +102,7 @@ namespace renderer.core
                     var x = float.Parse(split[1]);
                     var y = float.Parse(split[2]);
                     var z = float.Parse(split[3]);
-                    normals.Add(new Vector3(x, y, z));
+                    normals.Add(Vector3.Normalize(new Vector3(x, y, z)));
                 }
 
                 else if (split.First() == "v")
