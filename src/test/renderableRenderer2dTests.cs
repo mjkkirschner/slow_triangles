@@ -37,7 +37,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(736261, image.colors.Where(x => x == Color.Black).Count());
 
             System.IO.File.WriteAllBytes("../../../ShaderRender1.ppm", image.toByteArray());
         }

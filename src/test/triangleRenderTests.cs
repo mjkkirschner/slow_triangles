@@ -36,7 +36,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(677784, image.colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../triangleTest1_teapot.ppm", image.toByteArray());
         }
@@ -60,7 +60,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(741639, image.colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTest1.ppm", image.toByteArray());
         }
@@ -81,7 +81,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(741639, image.colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTestVertsDirect.ppm", image.toByteArray());
         }
@@ -105,7 +105,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(736261, image.colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTest3.ppm", image.toByteArray());
         }
@@ -126,7 +126,7 @@ namespace Tests
 
             var image = new ppmImage(1024, 768, 255);
             image.colors = renderer.Render();
-            //Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(677784, image.colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../teapotTest2.ppm", image.toByteArray());
         }
