@@ -86,18 +86,15 @@ namespace renderer.utilities
             var triNormal = Vector3.Cross(edge1, edge2);
             var area = triNormal.Z / 2f;
 
-            //NOT WORKING.....sad.... not sure why
-            //the normalized areas should add up to more than 1, but they don't.... !!odd.
-
-            var temp1 = Vector3.Cross(edge3, edgePC);
-            var temp2 = Vector3.Cross(edge4, edgePB);
+            var temp1 = Vector3.Cross(edge4, edgePB);
+            var temp2 = Vector3.Cross(edge3, edgePC);
             var temp3 = Vector3.Cross(edge5, edgePA);
 
             var u = (temp1.Z / 2f) / area;
             var v = (temp2.Z / 2f) / area;
-            var w = (temp3.Z / 2f) / area;
+            var w = (temp3.Z / 2f) / area;//(1.0f-u-v);
 
-            return new Vector3(w, u, v);
+            return new Vector3(u, v, w);
 
         }
 
@@ -170,7 +167,7 @@ namespace renderer.utilities
                        {
 
                            var IsInsideTriangle = pixelIsInsideTriangle(x, y, screenCords);
-                           var bary = TriangleExtensions.BaryCoordinates(x, y,
+                           var bary = TriangleExtensions.BaryCoordinates2(x, y,
                                A.ToVector2(), B.ToVector2(), C.ToVector2());
                            //compute the depth of current pixel.
                            var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;

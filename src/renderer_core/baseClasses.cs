@@ -54,7 +54,7 @@ namespace renderer.dataStructures
         {
             var varying_vector = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
             var intensity = Vector3.Dot(varying_vector, baryCoords);
-            var channel = (int)(255 * intensity);
+            var channel = System.Math.Min(255,(int)(255 * intensity));
             color = Color.FromArgb(channel, channel, channel);
             return true;
         }

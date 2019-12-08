@@ -24,7 +24,7 @@ namespace Tests
         public void MeshRendererCanRenderKnot_WithSimpleShaders()
         {
 
-            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/knot/knot.obj"));
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/knot3/knot3.obj"));
             var tris = mesh.Triangles;
 
             mesh.VertexData = mesh.VertexData.Select(x => Vector4.Multiply(x, new Vector4(1.0f, 1.0f, 1.0f, 1.0f)))
