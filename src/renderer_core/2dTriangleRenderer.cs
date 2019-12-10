@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Linq;
 using System;
 using renderer.utilities;
+using renderer.dataStructures;
 
 namespace renderer._2d
 {
@@ -29,7 +30,7 @@ namespace renderer._2d
             this.Height = height;
             this.Scene = triangleIndexData;
             imageBuffer = Enumerable.Repeat(Color.Red, Width * Height).ToArray();
-            depthBuffer = Enumerable.Repeat(1.0, Width * Height).ToArray();
+            depthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
 
         }
 
@@ -51,9 +52,9 @@ namespace renderer._2d
                        Console.WriteLine(tri);
                        //all position data will be unchanged and unscaled.
                        //TODO except maybe invert the y?
-                       var A = VertexData[tri.indexList[0] - 1];
-                       var B = VertexData[tri.indexList[1] - 1];
-                       var C = VertexData[tri.indexList[2] - 1];
+                       var A = VertexData[tri.vertIndexList[0] - 1];
+                       var B = VertexData[tri.vertIndexList[1] - 1];
+                       var C = VertexData[tri.vertIndexList[2] - 1];
 
                        var verts = new List<Vector3>() { A, B, C };
                        //calculate bounding box and iterate all pixels within.
@@ -64,15 +65,17 @@ namespace renderer._2d
 
                        Console.WriteLine($"{minx},{miny}    {maxx},{maxy}");
 
-                       Enumerable.Range((int)minx, (int)(maxx - minx) + 1).ToList().ForEach(x =>
+                       Enumerable.Range((int)minx, (int)(maxx - minx) + 2).ToList().ForEach(x =>
                          {
 
-                             Enumerable.Range((int)miny, (int)(maxy - miny) + 1).ToList().ForEach(y =>
+                             Enumerable.Range((int)miny, (int)(maxy - miny) + 2).ToList().ForEach(y =>
                              {
-                                 var IsInsideTriangle = pixelIsInsideTriangle(x, y, tri, VertexData);
+                                 var IsInsideTriangle = TriangleExtensions.pixelIsInsideTriangle(x, y, tri, VertexData);
 
-                                 var bary = TriangleExtensions.BaryCoordinates(x, y, tri, Verts2d);
+                                 var bary = TriangleExtensions.BaryCoordinates2(x, y, tri, Verts2d);
+                                 //compute the depth of current pixel.
                                  var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
+
 
                                  var AB = Vector3.Subtract(A, B);
                                  var AC = Vector3.Subtract(A, C);
@@ -82,17 +85,26 @@ namespace renderer._2d
                                  if (IsInsideTriangle)
                                  {
                                      var flatIndex = Width * (int)y + (int)x;
-                                   //don't draw unless we are within bounds
-                                   //don't draw if something is already in the depth buffer for this pixel.
-                                   if (flatIndex <= imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
+                                     //don't draw unless we are within bounds
+                                     //don't draw if something is already in the depth buffer for this pixel.
+                                     if (flatIndex <= imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
                                      {
-                                       //adjust color here.
-                                       var diffuseCoef = (float)(Math.Max(Vector3.Dot(ABXAC, new Vector3(1.0f, 0f, 0f)), 0.5));
+                                         //only draw if nothing else is closer in the depth buffer
+                                         if (z < depthBuffer[flatIndex])
+                                         {
+                                             //adjust color here.
+                                             var normalDotLightVector = Vector3.Dot(ABXAC, new Vector3(1.0f, 0f, 0f));
+                                             //if (normalDotLightVector < 0)
+                                             //{
+                                             //    return;
+                                             //}
+                                             var diffuseCoef = (float)(Math.Max(normalDotLightVector, 0.3));
+                                             //don't draw pixels which are facing directly away from camera.
 
 
-                                         imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * 255), (int)(diffuseCoef * 255), (int)(diffuseCoef * 255));
-                                         depthBuffer[flatIndex] = z;
-
+                                             imageBuffer[flatIndex] = Color.FromArgb((int)(diffuseCoef * 255), (int)(diffuseCoef * 255), (int)(diffuseCoef * 255));
+                                             depthBuffer[flatIndex] = z;
+                                         }
                                      }
                                  }
                              });
@@ -103,25 +115,6 @@ namespace renderer._2d
 
             return imageBuffer;
         }
-
-        private static bool pixelIsInsideTriangle(int x, int y, TriangleFace triangle, Vector3[] vectors)
-        {
-            var pt1 = vectors[triangle.indexList[0] - 1];
-            var pt2 = vectors[triangle.indexList[1] - 1];
-            var pt3 = vectors[triangle.indexList[2] - 1];
-
-            var barycenter = TriangleExtensions.BaryCoordinates(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
-            //only in the triangle if coefs are all positive.
-            if (barycenter.X >= 0.0 && barycenter.X <= 1.0 && barycenter.Y >= 0.0 && barycenter.Y <= 1.0 && barycenter.Z >= 0.0 && barycenter.Z <= 1.0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-
-
     }
 
 }

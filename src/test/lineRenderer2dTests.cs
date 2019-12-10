@@ -72,14 +72,14 @@ namespace Tests
             var trilines = tris.SelectMany(x =>
 
                           new List<(Vector2, Vector2, Color)>(){
-                        (new Vector2(verts[x.indexList[0]-1].X*50, verts[x.indexList[0]-1].Y*50),
-                       new Vector2(verts[x.indexList[1]-1].X*50, verts[x.indexList[1]-1].Y*50),Color.White),
+                        (new Vector2(verts[x.vertIndexList[0]-1].X*50, verts[x.vertIndexList[0]-1].Y*50),
+                       new Vector2(verts[x.vertIndexList[1]-1].X*50, verts[x.vertIndexList[1]-1].Y*50),Color.White),
 
-                        (new Vector2(verts[x.indexList[1]-1].X*50, verts[x.indexList[1]-1].Y*50),
-                       new Vector2(verts[x.indexList[2]-1].X*50, verts[x.indexList[2]-1].Y*50),Color.White),
+                        (new Vector2(verts[x.vertIndexList[1]-1].X*50, verts[x.vertIndexList[1]-1].Y*50),
+                       new Vector2(verts[x.vertIndexList[2]-1].X*50, verts[x.vertIndexList[2]-1].Y*50),Color.White),
 
-                       (new Vector2(verts[x.indexList[2]-1].X*50, verts[x.indexList[2]-1].Y*50),
-                      new Vector2(verts[x.indexList[0]-1].X*50, verts[x.indexList[0]-1].Y*50),Color.White),
+                       (new Vector2(verts[x.vertIndexList[2]-1].X*50, verts[x.vertIndexList[2]-1].Y*50),
+                      new Vector2(verts[x.vertIndexList[0]-1].X*50, verts[x.vertIndexList[0]-1].Y*50),Color.White),
                           }
                        );
 
