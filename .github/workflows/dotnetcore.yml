@@ -18,4 +18,6 @@ jobs:
         cd src
         dotnet build --configuration Release
     - name: test
-      run: dotnet test 
+      run: | 
+        cd src
+        dotnet test 
