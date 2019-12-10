@@ -149,7 +149,7 @@ namespace renderer.utilities
 
 
         //TODO should probably be Vector4
-        public static void drawTriangle(int triIndex, Vector3[] screenCords, Shader shader, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
+        public static void drawTriangle(int triIndex, Vector3[] screenCords, Material material, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
         {
             var minx = screenCords.Select(x => x.X).Min();
             var miny = screenCords.Select(x => x.Y).Min();
@@ -181,7 +181,7 @@ namespace renderer.utilities
                                {
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
                                    Color diffColor;
-                                   if (z < zbuffer[flatIndex] && shader.FragmentToRaster(bary, ref diffColor))
+                                   if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, ref diffColor))
                                    {
 
                                        imageBuffer[flatIndex] = diffColor;

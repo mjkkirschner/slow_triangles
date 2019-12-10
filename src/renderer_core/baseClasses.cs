@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Linq;
 
 namespace renderer.dataStructures
 {
@@ -25,8 +26,26 @@ namespace renderer.dataStructures
 
     public class Texture2d
     {
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
         //span?
-        IEnumerable<Color> ColorData { get; set; }
+        public IList<Color> ColorData { get; set; }
+
+        public Color GetColorAtUV(Vector2 UV)
+        {
+            var x = UV.X * Width;
+            var y = UV.Y * Height;
+
+            return ColorData[Width * (int)y + (int)x];
+        }
+
+        public Texture2d(int width, int height, IEnumerable<Color> colorData)
+        {
+            this.Width = width;
+            this.Height = height;
+            this.ColorData = colorData.ToArray();
+        }
     }
 
     //TODO this type likely to be replaced after implementing materials/shaders / materialMeshes.
@@ -50,11 +69,11 @@ namespace renderer.dataStructures
         }
 
 
-        public virtual bool FragmentToRaster(Vector3 baryCoords, ref Color color)
+        public virtual bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
             var varying_vector = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
             var intensity = Vector3.Dot(varying_vector, baryCoords);
-            var channel = System.Math.Min(255,(int)(255 * intensity));
+            var channel = System.Math.Min(255, (int)(255 * intensity));
             color = Color.FromArgb(channel, channel, channel);
             return true;
         }
@@ -66,6 +85,7 @@ namespace renderer.dataStructures
     {
         public Shader Shader { get; set; }
     }
+
 
     /// <summary>
     /// A bag for data and materials which specify how to render that data.

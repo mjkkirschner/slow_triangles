@@ -8,6 +8,9 @@ using renderer.core;
 using renderer._2d;
 using renderer.interfaces;
 using renderer.dataStructures;
+using renderer.materials;
+using renderer.shaders;
+using renderer.tests;
 
 namespace Tests
 {
@@ -41,6 +44,38 @@ namespace Tests
 
             System.IO.File.WriteAllBytes("../../../ShaderRender1.ppm", image.toByteArray());
         }
+
+        [Test]
+        public void MeshRenderUVsAndTexture()
+        {
+
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/knot3/knot3.obj"));
+            var tris = mesh.Triangles;
+
+            mesh.VertexData = mesh.VertexData.Select(x => Vector4.Multiply(x, new Vector4(1.0f, 1.0f, 1.0f, 1.0f)))
+            //scale and offset.
+            .Select(x => Vector4.Multiply(Vector4.Add(x, new Vector4(5, 5, 0, 0)), 120.0f)).ToArray();
+
+            var ppm = new ppmImage("../../../../../textures/testTexture2.ppm");
+            var renderable = new Renderable<Mesh>(
+                new DiffuseMaterial()
+                {
+                    Shader = new TextureShader(),
+                    DiffuseTexture = new Texture2d(ppm.width, ppm.height, ppm.colors)
+                },
+                mesh);
+            var renderer = new Renderer2dGeneric<Mesh>(1024, 768, Color.Black, new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
+
+            var image = new ppmImage(1024, 768, 255);
+            image.colors = renderer.Render();
+
+            //how many pixels are bluish...
+            Assert.AreEqual(4050, image.colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+
+            System.IO.File.WriteAllBytes("../../../ShaderRender2.ppm", image.toByteArray());
+        }
+
+
 
 
 

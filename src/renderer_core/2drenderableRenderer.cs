@@ -32,7 +32,7 @@ namespace renderer._2d
                group.ToList().ForEach(renderable =>
                {
                    //for now only one shader.
-                   var shader = renderable.material.Shader;
+                   var material = renderable.material;
 
                    //render
                    var triIndex = 0;
@@ -44,11 +44,11 @@ namespace renderer._2d
                        var localVertIndex = 0;
                        foreach (var meshVertInde in triFace.vertIndexList)
                        {
-                           screenCoords.Add(shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex));
+                           screenCoords.Add(material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex));
                            localVertIndex++;
                        }
 
-                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), shader, depthBuffer, imageBuffer, Width);
+                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, depthBuffer, imageBuffer, Width);
                        triIndex = triIndex + 1;
                    }
                })
