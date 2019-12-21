@@ -16,8 +16,13 @@ namespace Tests
         public void LoadPNGImage()
         {
             //load a ppm
-            var png = PNGImage.readPngFromFile("../../../../../testTexture.png");
+            var png = PNGImage.readPngFromFile("../../../../../textures/testTexture.png");
 
+            var ppm = new ppmImage(512, 512, 255);
+            ppm.colors = png.Colors;
+
+            var savePath = "../../../../../testTexture1.ppm";
+            System.IO.File.WriteAllBytes(savePath, ppm.toByteArray());
 
         }
     }

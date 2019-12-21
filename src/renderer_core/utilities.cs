@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -7,6 +8,17 @@ using renderer.interfaces;
 
 namespace renderer.utilities
 {
+    public static class ListExtensions
+    {
+        public static List<List<T>> Split<T>(List<T> source, uint groupSize)
+        {
+            return source
+                .Select((x, i) => (Index: i, Value: x))
+                .GroupBy(x => x.Index / groupSize)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
+    }
 
     public static class Vector3Extensions
     {
