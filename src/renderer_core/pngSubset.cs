@@ -13,17 +13,17 @@ using renderer.utilities;
 namespace renderer.core
 {
     [Flags]
-    public enum ColorType
+    enum ColorType
     {
         GREY = 0, INDEX = 1, COLOR = 2, ALPHA = 4
     }
 
-    public enum CompressionType : byte
+    enum CompressionType : byte
     {
         Defalate = 0
     }
 
-    public enum FilterMethod
+    enum FilterMethod
     {
         ADAPTIVE = 0
     }
@@ -35,7 +35,11 @@ namespace renderer.core
       3	Average	Filt(x) = Orig(x) - floor((Orig(a) + Orig(b)) / 2)	Recon(x) = Filt(x) + floor((Recon(a) + Recon(b)) / 2)
       4	Paeth	Filt(x) = Orig(x) - PaethPredictor(Orig(a), Orig(b), Orig(c))	Recon(x) = Filt(x) + PaethPredictor(Recon(a), Recon(b), Recon(c))
 */
-    public enum FilterType
+
+    /// <summary>
+    /// Filter type describes which filter algorithm is used to encode a specific scanline.
+    /// </summary>
+    enum FilterType
     {
         None = 0,
         Sub_Filter = 1,
@@ -44,36 +48,40 @@ namespace renderer.core
         PaethFilter = 4
     }
 
-    class ChunkHeader
+    /// <summary>
+    /// Describe a chunk.
+    /// </summary>
+    internal class ChunkHeader
     {
-        public int datalength;
-        public string name;
-        bool IsCritical => char.IsUpper(name[0]);
+        public int Datalength { get; }
+        public string Name { get; }
+        bool IsCritical => char.IsUpper(Name[0]);
 
         public ChunkHeader(byte[] Header)
         {
             //data is reversed since PNG data is big endian and intel is little endian.
-            datalength = BitConverter.ToInt32(Header.Take(4).Reverse().ToArray(), 0);
-            name = Encoding.ASCII.GetString(Header, 4, 4);
+            Datalength = BitConverter.ToInt32(Header.Take(4).Reverse().ToArray(), 0);
+            Name = Encoding.ASCII.GetString(Header, 4, 4);
         }
     }
 
-    public class ImageHeader
+    /// <summary>
+    /// specific chunk and data that represents image header.
+    /// </summary>
+    internal class ImageHeader
     {
-        public int Width;
-        public int Height;
-        public byte BitDepth;
-        public ColorType ColorType;
-        public CompressionType CompressionType;
-        public FilterMethod FilterMethod;
-        public bool Interlaced;
+        public int Width { get; }
+        public int Height { get; }
+        public byte BitDepth { get; }
+        public ColorType ColorType { get; }
+        public CompressionType CompressionType { get; }
+        public FilterMethod FilterMethod { get; }
+        public bool Interlaced { get; }
 
         public ImageHeader(int width, int height, byte bitDepth,
                      ColorType colorType, CompressionType compression,
                             FilterMethod filterMethod, bool interlaced)
         {
-
-
             this.Width = width;
             this.Height = height;
             this.BitDepth = bitDepth;
@@ -84,10 +92,13 @@ namespace renderer.core
         }
     }
 
+
+    /// <summary>
+    /// small subset of png decode functionality.
+    /// </summary>
     public class PNGImage
     {
-
-        public ImageHeader Header;
+        private ImageHeader Header;
         public byte[] data;
         public int bytesPerPixel;
 
@@ -99,14 +110,14 @@ namespace renderer.core
             }
         }
 
-        public PNGImage(ImageHeader header, byte[] data, int bytesPerPixel)
+        private PNGImage(ImageHeader header, byte[] data, int bytesPerPixel)
         {
             this.Header = header;
             this.data = data;
             this.bytesPerPixel = bytesPerPixel;
         }
 
-        public static PNGImage readPngFromFile(string path)
+        public static PNGImage LoadPNGFromPath(string path)
         {
             //read the image header first and run some assertions on it.
             //TODO - once it works, use streams or spans...
@@ -128,11 +139,11 @@ namespace renderer.core
                 {
                     var chunkHeader = new ChunkHeader(bytes.Skip(position).Take(8).ToArray());
                     position += 8;
-                    //read some more bytes.
-                    var currentData = bytes.Skip(position).Take(chunkHeader.datalength).ToArray();
-                    //add 4 bytes for CRC.
-                    position += chunkHeader.datalength + 4;
-                    switch (chunkHeader.name)
+                    //read some more bytes given the chunks length.
+                    var currentData = bytes.Skip(position).Take(chunkHeader.Datalength).ToArray();
+                    //add 4 bytes for CRC.... TODO maybe check it...
+                    position += chunkHeader.Datalength + 4;
+                    switch (chunkHeader.Name)
                     {
                         case "IEND":
                             Console.WriteLine("this is the end of the png.");
@@ -146,7 +157,7 @@ namespace renderer.core
                             Console.WriteLine("found index color palette chunk");
                             break;
                         default:
-                            Console.WriteLine($"unknown chunk type {chunkHeader.name}");
+                            Console.WriteLine($"unknown chunk type {chunkHeader.Name}");
                             break;
                     }
 
@@ -231,6 +242,9 @@ namespace renderer.core
         /// <param name="bytesPerPixel"></param>
         private static void Inverse_Filter(byte[] currentRow, byte[] previousRow, FilterType type, int currentByteIndex, int bytesPerPixel)
         {
+            // in the below index checks we check against index of 1 instead of 0 because the filter type byte is index 0 and we don't
+            // want to include this inside any of the filter computations.
+
             //Console.WriteLine(Enum.GetName(typeof(FilterType), type));
             if (type == FilterType.Up_Filter)
             {
@@ -242,7 +256,7 @@ namespace renderer.core
             else if (type == FilterType.Sub_Filter)
             {
                 byte dataInPreviousPixel = 0;
-                if (currentByteIndex - bytesPerPixel >= 0)
+                if (currentByteIndex - bytesPerPixel >= 1)
                 {
                     dataInPreviousPixel = currentRow[currentByteIndex - bytesPerPixel];
                 }
@@ -257,7 +271,11 @@ namespace renderer.core
             else if (type == FilterType.Average_Filter)
             {
                 var dataInRowAbove = previousRow[currentByteIndex];
-                var dataInPreviousPixel = currentRow[currentByteIndex - bytesPerPixel];
+                byte dataInPreviousPixel = 0;
+                if (currentByteIndex - bytesPerPixel >= 1)
+                {
+                    dataInPreviousPixel = currentRow[currentByteIndex - bytesPerPixel];
+                }
                 currentRow[currentByteIndex] += (byte)((dataInPreviousPixel + dataInRowAbove) / 2);
             }
             else if (type == FilterType.PaethFilter)
@@ -266,12 +284,12 @@ namespace renderer.core
 
                 byte dataInPreviousPixel = 0;
                 byte dataInPreviousPixelAbove = 0;
-                if (currentByteIndex - bytesPerPixel >= 0)
+                if (currentByteIndex - bytesPerPixel >= 1)
                 {
                     dataInPreviousPixel = currentRow[currentByteIndex - bytesPerPixel];
                 }
 
-                if (currentByteIndex - bytesPerPixel >= 0)
+                if (currentByteIndex - bytesPerPixel >= 1)
                 {
                     dataInPreviousPixelAbove = previousRow[currentByteIndex - bytesPerPixel];
                 }
@@ -335,7 +353,7 @@ namespace renderer.core
             var IHDRHEADER = bytes.Skip(currentPos).Take(8).ToArray();
             currentPos += 8;
             var imageHeader = new ChunkHeader(IHDRHEADER);
-            if (imageHeader.datalength != 13)
+            if (imageHeader.Datalength != 13)
             {
                 throw new Exception("chunk header did not specify 13 byte len");
                 /*
@@ -348,7 +366,7 @@ namespace renderer.core
                 Interlace method	1 byte
                 */
             }
-            if (imageHeader.name != "IHDR")
+            if (imageHeader.Name != "IHDR")
             {
                 throw new Exception("chunk header not IHDR");
             }
