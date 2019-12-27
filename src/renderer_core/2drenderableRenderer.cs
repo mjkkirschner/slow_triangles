@@ -38,7 +38,6 @@ namespace renderer._2d
                    var triIndex = 0;
                    foreach (var triFace in renderable.RenderableObject.Triangles)
                    {
-
                        //transform verts to screenspace
                        var screenCoords = new List<Vector3>();
                        var localVertIndex = 0;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 using System.Linq;
+using renderer.utilities;
 
 namespace renderer.dataStructures
 {
@@ -48,13 +49,36 @@ namespace renderer.dataStructures
         }
     }
 
+    public class Base3dShader : Shader
+    {
+        protected Matrix4x4 ViewModelMatrix;
+        protected Matrix4x4 ProjectionMatrix;
+        protected Matrix4x4 ViewportMatrix;
+        public Base3dShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
+        {
+            this.ViewModelMatrix = viewMatrix;
+            this.ProjectionMatrix = projectionMatrix;
+            this.ViewportMatrix = viewPort;
+        }
+
+        public override Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
+        {
+            var vert = base.VertexToFragment(mesh, triangleIndex, vertIndex);
+            var mvp = Matrix4x4.Transpose(Matrix4x4.Multiply(ViewModelMatrix, ProjectionMatrix));
+            //var final = Matrix4x4.Multiply(ViewportMatrix, mvp);
+            return vert.ApplyMatrix(mvp);
+        }
+
+
+    }
+
     //TODO this type likely to be replaced after implementing materials/shaders / materialMeshes.
     //could also flip architecture to composable style.
 
     public class Shader
     {
         public Vector3 LightDirection = new Vector3(0, -1, 0);
-        float[] varying_intensity = new float[3];
+        protected float[] varying_intensity = new float[3];
         public virtual Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];

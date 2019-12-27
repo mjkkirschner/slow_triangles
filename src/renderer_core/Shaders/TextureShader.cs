@@ -7,8 +7,7 @@ namespace renderer.shaders
 {
     public class TextureShader : Shader
     {
-        float[] varying_intensity = new float[3];
-        Vector2[] varying_UVCoord = new Vector2[3];
+        protected Vector2[] varying_UVCoord = new Vector2[3];
         //TODO maybe these methods should be generic to the type of material.
 
         public override Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)

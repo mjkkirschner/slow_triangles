@@ -14,7 +14,7 @@ using renderer.tests;
 
 namespace Tests
 {
-    public class GenericRenderer
+    public class Render2dTests
     {
         [SetUp]
         public void Setup()

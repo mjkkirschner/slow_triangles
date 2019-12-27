@@ -36,6 +36,46 @@ namespace renderer.utilities
         {
             return new Vector2(vec.X, vec.Y);
         }
+
+        public static Vector3 ApplyMatrix(this Vector3 self, Matrix4x4 matrix)
+        {
+
+            var w = matrix.M41 * self.X + matrix.M42 * self.Y + matrix.M43 * self.Z + matrix.M44;
+
+            //matrix = Matrix4x4.Transpose(matrix);
+            var outVector = new Vector3(
+                matrix.M11 * self.X + matrix.M12 * self.Y + matrix.M13 * self.Z + matrix.M14,
+                matrix.M21 * self.X + matrix.M22 * self.Y + matrix.M23 * self.Z + matrix.M24,
+                matrix.M31 * self.X + matrix.M32 * self.Y + matrix.M33 * self.Z + matrix.M34
+            );
+
+            if (w != 1)
+            {
+                outVector.X /= w;
+                outVector.Y /= w;
+                outVector.Z /= w;
+            }
+            return outVector;
+        }
+
+
+    }
+
+    public static class MatrixExtensions
+    {
+        public static Matrix4x4 CreateViewPortMatrix(int x, int y, int z, int w, int h)
+        {
+            Matrix4x4 m = Matrix4x4.Identity;
+            m.M14 = x + w / 2f;
+            m.M24 = y + h / 2f;
+            m.M34 = z / 2f;
+
+            m.M11 = w / 2f;
+            m.M22 = h / 2f;
+            m.M33 = z / 2f;
+            return m;
+
+        }
     }
 
     public static class TriangleExtensions
@@ -152,7 +192,7 @@ namespace renderer.utilities
             var barycenter = TriangleExtensions.BaryCoordinates2(x, y, pt1.ToVector2(), pt2.ToVector2(), pt3.ToVector2());
             //only in the triangle if coefs are all positive.
 
-            if (barycenter.X < 0 || barycenter.X >= 1f || barycenter.Y < 0 || barycenter.Y >= 1f || barycenter.Z < 0 || barycenter.Z >= 1f)
+            if (barycenter.X < 0 || barycenter.X > 1f || barycenter.Y < 0 || barycenter.Y > 1f || barycenter.Z < 0 || barycenter.Z > 1f)
             {
                 return false;
             }
@@ -183,13 +223,12 @@ namespace renderer.utilities
                                A.ToVector2(), B.ToVector2(), C.ToVector2());
                            //compute the depth of current pixel.
                            var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
-
                            if (IsInsideTriangle)
                            {
                                var flatIndex = imageBufferWidth * (int)y + (int)x;
                                //don't draw unless we are within bounds
                                //don't draw if something is already in the depth buffer for this pixel.
-                               if (flatIndex <= imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
+                               if (flatIndex < imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
                                {
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
                                    Color diffColor;
