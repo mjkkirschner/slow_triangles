@@ -47,11 +47,11 @@ namespace renderer._3d
                            var vect = material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
                            //Console.WriteLine(vect);
                            //TODO this should be done with a viewport matrix.
-                           int scaledX = (int)((vect.X * (.5 * (float)Width)) + (.5 * (float)Width));
+                           //int scaledX = (int)((vect.X * (.5 * (float)Width)) + (.5 * (float)Width));
                            //for some reason to make y scale correctly, we need to invert the values during scaling.
-                           int scaledY = (int)((vect.Y * -(.5 * (float)Height)) + (.5 * (float)Height));
+                           //int scaledY = (int)((vect.Y * -(.5 * (float)Height)) + (.5 * (float)Height));
 
-                           int scaledZ = (int)((vect.Z * (.5f * 256f)) + (.5f * 256f));
+                           //int scaledZ = (int)((vect.Z * (.5f * 256f)) + (.5f * 256f));
 
                            //if outside clip bounds, we will mark the vert NAN.
                           /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
@@ -60,7 +60,7 @@ namespace renderer._3d
                            }
                            else
                          */  {
-                               screenCoords.Add(new Vector3(scaledX, scaledY, scaledZ));
+                               screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
 
                            }
 

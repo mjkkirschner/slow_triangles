@@ -63,16 +63,16 @@ namespace renderer.utilities
 
     public static class MatrixExtensions
     {
-        public static Matrix4x4 CreateViewPortMatrix(int x, int y, int z, int w, int h)
+        public static Matrix4x4 CreateViewPortMatrix(int x, int y, int depthMax, int w, int h)
         {
             Matrix4x4 m = Matrix4x4.Identity;
             m.M14 = x + w / 2f;
             m.M24 = y + h / 2f;
-            m.M34 = z / 2f;
+            m.M34 = depthMax / 2f;
 
             m.M11 = w / 2f;
             m.M22 = h / 2f;
-            m.M33 = z / 2f;
+            m.M33 = depthMax / 2f;
             return m;
 
         }

@@ -65,8 +65,8 @@ namespace renderer.dataStructures
         {
             var vert = base.VertexToFragment(mesh, triangleIndex, vertIndex);
             var mvp = Matrix4x4.Transpose(Matrix4x4.Multiply(ViewModelMatrix, ProjectionMatrix));
-            //var final = Matrix4x4.Multiply(ViewportMatrix, mvp);
-            return vert.ApplyMatrix(mvp);
+            var final = Matrix4x4.Multiply(ViewportMatrix, mvp);
+            return vert.ApplyMatrix(final);
         }
 
 
