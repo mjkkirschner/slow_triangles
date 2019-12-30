@@ -32,8 +32,8 @@ namespace Tests
             var renderer = new LineRenderer2d(640, 480, lines);
 
             var image = new ppmImage(640, 480, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(930, image.colors.Where(x => x == Color.White).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(930, image.Colors.Where(x => x == Color.White).Count());
             System.IO.File.WriteAllBytes("../../../linetest.ppm", image.toByteArray());
         }
 
@@ -55,8 +55,8 @@ namespace Tests
             var renderer = new LineRenderer2d(640, 480, lines);
 
             var image = new ppmImage(640, 480, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(24390, image.colors.Where(x => x == Color.White).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(24390, image.Colors.Where(x => x == Color.White).Count());
 
             System.IO.File.WriteAllBytes("../../../linetest_circle.ppm", image.toByteArray());
         }
@@ -88,8 +88,8 @@ namespace Tests
             var renderer = new LineRenderer2d(640, 480, lines);
 
             var image = new ppmImage(640, 480, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(18702, image.colors.Where(x => x == Color.White).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(18702, image.Colors.Where(x => x == Color.White).Count());
 
             System.IO.File.WriteAllBytes("../../../linetest_teapot.ppm", image.toByteArray());
         }

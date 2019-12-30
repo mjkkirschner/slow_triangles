@@ -23,10 +23,10 @@ namespace Tests
             //load it back
             var ppm2 = new ppmImage(savePath);
 
-            Assert.AreEqual(ppm.width, ppm2.width);
-            Assert.AreEqual(ppm.height, ppm2.height);
+            Assert.AreEqual(ppm.Width, ppm2.Width);
+            Assert.AreEqual(ppm.Height, ppm2.Height);
             Assert.AreEqual(ppm.maxColorValue, ppm2.maxColorValue);
-            Assert.IsTrue(ppm.colors.SequenceEqual(ppm2.colors));
+            Assert.IsTrue(ppm.Colors.SequenceEqual(ppm2.Colors));
 
             //cleanup
             System.IO.File.Delete(savePath);

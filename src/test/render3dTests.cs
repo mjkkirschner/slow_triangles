@@ -8,6 +8,8 @@ using renderer.dataStructures;
 
 using renderer.utilities;
 using renderer._3d;
+using renderer.materials;
+using renderer.shaders;
 
 namespace Tests
 {
@@ -20,7 +22,7 @@ namespace Tests
 
 
         [Test]
-        public void MeshRenderUVsAndTexture()
+        public void MeshRenderPerspProjectionShader()
         {
 
             var cameraPos = new Vector3(0, 0, 4);
@@ -37,13 +39,81 @@ namespace Tests
                     Shader = new Base3dShader(view, proj, viewport)
                 },
                 mesh);
-            var renderer = new Renderer3dGeneric<Mesh>(640, 480, Color.White, 
+            var renderer = new Renderer3dGeneric<Mesh>(640, 480, Color.White,
                 new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
 
             var image = new ppmImage(640, 480, 255);
-            image.colors = renderer.Render();
+            image.Colors = renderer.Render();
             System.IO.File.WriteAllBytes("../../../perspectiveTest1.ppm", image.toByteArray());
-            Assert.AreEqual(300115, image.colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(300249, image.Colors.Where(x => x == Color.White).Count());
+
+
+        }
+
+        [Test]
+        public void Prespective_Tex_Map()
+        {
+
+            var cameraPos = new Vector3(0, 0, 2);
+            var target = new Vector3(0, 0, 0);
+            var width = 1024;
+            var height = 1024;
+            var view = Matrix4x4.CreateLookAt(cameraPos, target, Vector3.UnitY);
+            var proj = Matrix4x4.CreatePerspective(4, 4, 1, 10);
+            var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, width, height);
+
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/knot3/knot3.obj"));
+            var diffuseTex = new ppmImage("../../../../../textures/testTexture2.ppm");
+
+            var renderable = new Renderable<Mesh>(
+                new DiffuseMaterial()
+                {
+                    Shader = new TextureShader(view, proj, viewport),
+                    DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors)
+                },
+                mesh);
+            var renderer = new Renderer3dGeneric<Mesh>(width, height, Color.White,
+                new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
+
+            var image = new ppmImage(width, height, 255);
+            image.Colors = renderer.Render();
+            System.IO.File.WriteAllBytes("../../../perspectiveTestDiffuse.ppm", image.toByteArray());
+            Assert.AreEqual(847497, image.Colors.Where(x => x == Color.White).Count());
+
+
+        }
+
+        [Test]
+        public void Prespective_Normal_Map()
+        {
+
+            var cameraPos = new Vector3(0, 0, 2);
+            var target = new Vector3(0, 0, 0);
+            var width = 1024;
+            var height = 1024;
+            var view = Matrix4x4.CreateLookAt(cameraPos, target, Vector3.UnitY);
+            var proj = Matrix4x4.CreatePerspective(4, 4, 1, 10);
+            var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, width, height);
+
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/knot3/knot3.obj"));
+            var diffuseTex = new ppmImage("../../../../../textures/testTexture2.ppm");
+            var normalMap = PNGImage.LoadPNGFromPath("../../../../../textures/testMaps/gridnormalmap.png");
+
+            var renderable = new Renderable<Mesh>(
+                new NormalMaterial()
+                {
+                    Shader = new NormalShader(view, proj, viewport),
+                    DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
+                    NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
+                },
+                mesh);
+            var renderer = new Renderer3dGeneric<Mesh>(width, height, Color.White,
+                new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
+
+            var image = new ppmImage(width, height, 255);
+            image.Colors = renderer.Render();
+            System.IO.File.WriteAllBytes("../../../perspectiveTestNormal.ppm", image.toByteArray());
+            //Assert.AreEqual(847497, image.Colors.Where(x => x == Color.White).Count());
 
 
         }

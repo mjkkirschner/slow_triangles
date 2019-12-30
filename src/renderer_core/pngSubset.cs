@@ -102,6 +102,9 @@ namespace renderer.core
         public byte[] data;
         public int bytesPerPixel;
 
+        public int Width => Header.Width;
+        public int Height => Header.Height;
+
         public Color[] Colors
         {
             get

@@ -55,8 +55,8 @@ namespace Tests
             var renderer = new LineRenderer2d(1024, 768,lines );
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(23672, image.colors.Where(x => x == Color.White).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(23672, image.Colors.Where(x => x == Color.White).Count());
 
             System.IO.File.WriteAllBytes("../../../objLoaderTest1.ppm", image.toByteArray());
         }
@@ -96,8 +96,8 @@ namespace Tests
             var renderer = new LineRenderer2d(1024, 768,lines );
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(38703, image.colors.Where(x => x == Color.White).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(38703, image.Colors.Where(x => x == Color.White).Count());
 
             System.IO.File.WriteAllBytes("../../../objLoaderTest2.ppm", image.toByteArray());
         }

@@ -12,16 +12,16 @@ namespace renderer.core
     /// </summary>
     public class ppmImage
     {
-        public int width;
-        public int height;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
         public UInt16 maxColorValue;
-        public Color[] colors;
+        public Color[] Colors { get; set; }
         public ppmImage(int width, int height, UInt16 maxColorValue)
         {
-            this.height = height;
-            this.width = width;
+            this.Height = height;
+            this.Width = width;
             this.maxColorValue = maxColorValue;
-            this.colors = new Color[width * height];
+            this.Colors = new Color[width * height];
         }
 
         public ppmImage(string filePath)
@@ -74,23 +74,23 @@ namespace renderer.core
             {
                 colorData.Add(Color.FromArgb(bytes[index], bytes[index + 1], bytes[index + 2]));
             }
-            this.width = int.Parse(dataStrings[1]);
-            this.height = int.Parse(dataStrings[2]);
+            this.Width = int.Parse(dataStrings[1]);
+            this.Height = int.Parse(dataStrings[2]);
             this.maxColorValue = ushort.Parse(dataStrings[3]);
-            this.colors = colorData.ToArray();
+            this.Colors = colorData.ToArray();
 
         }
 
 
         public void setPixel(int x, int y, Color color)
         {
-            this.colors[(y * width) + x] = color;
+            this.Colors[(y * Width) + x] = color;
         }
 
         public byte[] toByteArray()
         {
-            var header = new string[] { "P6", Environment.NewLine, width.ToString(), Environment.NewLine, height.ToString(), Environment.NewLine, maxColorValue.ToString(), Environment.NewLine };
-            var data = this.colors.SelectMany(x => new byte[3] { x.R, x.G, x.B });
+            var header = new string[] { "P6", Environment.NewLine, Width.ToString(), Environment.NewLine, Height.ToString(), Environment.NewLine, maxColorValue.ToString(), Environment.NewLine };
+            var data = this.Colors.SelectMany(x => new byte[3] { x.R, x.G, x.B });
 
             var headerAsBytes = Encoding.ASCII.GetBytes(string.Join("", header));
 

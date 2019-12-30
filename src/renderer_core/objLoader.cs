@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using renderer.dataStructures;
 using renderer.interfaces;
+using renderer.utilities;
 
 namespace renderer.core
 {
@@ -113,8 +114,64 @@ namespace renderer.core
                     verts.Add(new Vector4(x, y, z, 1));
                 }
             }
-            return new Mesh(triFaces, verts, normals, uvs);
+
+
+            var tempMesh = new Mesh(triFaces, verts, normals, uvs);
+            //TODO this can't be calculated if UVs don't exist.
+            foreach (var triface in triFaces)
+            {
+                //calculate tangents //TODO average these based on shared faces.
+                var (tan, binorm) = caluculatetangentSpaceForTri(triface, tempMesh);
+                tempMesh.BiNormals_akaBiTangents.Add(binorm);
+                tempMesh.Tangents.Add(tan);
+            }
+            tempMesh.computeAveragedTangents();
+            return tempMesh;
         }
+
+        public static (Vector3, Vector3) caluculatetangentSpaceForTri(TriangleFace triangleFace, Mesh mesh)
+        {
+            var triVerts = triangleFace.vertIndexList.Select(ind => mesh.VertexData[ind - 1].ToVector3()).ToArray();
+            var uvs = triangleFace.UVIndexList.Select(ind => mesh.VertexUVData[ind - 1]).ToArray();
+            var normals = triangleFace.NormalIndexList.Select(ind => mesh.VertexNormalData[ind - 1]).ToArray();
+
+
+            var p0 = triVerts[0];
+            var p1 = triVerts[1];
+            var p2 = triVerts[2];
+
+            var tex0 = uvs[0];
+            var tex1 = uvs[1];
+            var tex2 = uvs[2];
+
+            var norm0 = normals[0];
+            var norm1 = normals[1];
+            var norm2 = normals[2];
+
+            var q1 = Vector3.Subtract(p1, p0);
+            var q2 = Vector3.Subtract(p2, p0);
+
+            var temp1 = Vector2.Subtract(tex1, tex0);
+            var temp2 = Vector2.Subtract(tex2, tex0);
+
+            var s = new Vector2(temp1.X, temp2.X);
+            var t = new Vector2(temp1.Y, temp2.Y);
+
+            var recip = 1f / ((temp1.X * temp2.Y) - (temp1.Y * temp2.X));
+
+            //these seem exactly the same...
+
+            var udir = Vector3.Multiply(recip, Vector3.Subtract(Vector3.Multiply(temp2.Y, q1), (Vector3.Multiply(temp1.Y, q2))));
+            var vdir = Vector3.Multiply(recip, Vector3.Subtract(Vector3.Multiply(temp1.X, q2), (Vector3.Multiply(temp2.X, q1))));
+
+            //var udir = new Vector3((t.Y * q1.X - t.X * q2.X) * recip, (t.Y * q1.Y - t.X * q2.Y) * recip, (t.Y * q1.Z - t.X * q2.Z) * recip);
+            //var vdir = new Vector3((s.X * q2.X - s.Y * q1.X) * recip, (s.X * q2.Y - s.Y * q1.Y) * recip, (s.X * q2.Z - s.Y * q1.Z) * recip);
+
+            return (udir, vdir);
+
+        }
+
+
 
     }
 }
