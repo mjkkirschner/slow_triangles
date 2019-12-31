@@ -92,7 +92,7 @@ namespace renderer.dataStructures
 
         }
 
-        
+
 
     }
 
@@ -107,8 +107,8 @@ namespace renderer.dataStructures
 
         public Color GetColorAtUV(Vector2 UV)
         {
-            var x = UV.X * Width;
-            var y = UV.Y * Height;
+            var x = (1.0f - UV.X) * Width;
+            var y = (1.0f - UV.Y) * Height;
 
             return ColorData[Width * (int)y + (int)x];
         }
@@ -240,12 +240,14 @@ namespace renderer.dataStructures
             var averagedTangents = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexData.Count).ToList();
             var averagedBiNormals = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexData.Count).ToList();
             var triIndex = 0;
+
             foreach (var tri in Triangles)
             {
                 foreach (var vert in tri.vertIndexList)
                 {
                     averagedTangents[vert - 1] = Vector3.Add(averagedTangents[vert - 1], this.Tangents[triIndex]);
                     averagedBiNormals[vert - 1] = Vector3.Add(averagedBiNormals[vert - 1], this.BiNormals_akaBiTangents[triIndex]);
+
                 }
                 triIndex++;
             }
@@ -254,8 +256,26 @@ namespace renderer.dataStructures
             this.VertTangents = new List<Vector3>();
             for (var i = 0; i < averagedBiNormals.Count; i++)
             {
-                this.VertTangents.Add(Vector3.Normalize(averagedTangents[i]));
-                this.VertBiNormals.Add(Vector3.Normalize(averagedBiNormals[i]));
+                var t = Vector3.Normalize(averagedTangents[i]);
+                var b = Vector3.Normalize(averagedBiNormals[i]);
+                var n = this.VertexNormalData[i];
+
+                t = Vector3.Normalize(t - (n * Vector3.Dot(n, t)));
+
+                if (Vector3.Dot(Vector3.Cross(n, t), b) < 0.0f)
+                {
+                    t = t * -1.0f;
+                }
+                //check for degenerate data...
+                //TODO must be a better solution
+                if (float.IsNaN(t.X) || float.IsNaN(t.Y) || float.IsNaN(t.Z)
+                || float.IsNaN(b.X) || float.IsNaN(b.Y) || float.IsNaN(b.Z))
+                {
+                    throw new ArgumentException();
+                }
+
+                this.VertTangents.Add(t);
+                this.VertBiNormals.Add(b);
             }
         }
 
@@ -269,7 +289,7 @@ namespace renderer.dataStructures
                     counts[vert - 1] = counts[vert - 1] + 1;
                 }
             }
-            Console.WriteLine($"{counts.Where(x => x < 2).Count()} verts with no other triangles sharing this vert. ");
+            Console.WriteLine($"{counts.Where(x => x < 3).Count()} verts with no other triangles sharing this vert. ");
         }
     }
 

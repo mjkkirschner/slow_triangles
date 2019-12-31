@@ -88,8 +88,11 @@ namespace renderer.core
 
             foreach (var line in lines)
             {
-                var split = line.Split(' ');
-
+                var split = line.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                if (split.Count() < 1)
+                {
+                    continue;
+                }
                 if (split.First() == "vt")
                 {
                     var u = float.Parse(split[1]);
@@ -117,7 +120,11 @@ namespace renderer.core
 
 
             var tempMesh = new Mesh(triFaces, verts, normals, uvs);
-            //TODO this can't be calculated if UVs don't exist.
+            //we can't compute tangents (at least using uvs) if uvs don't exist.
+            if (uvs.Count < 1)
+            {
+                return tempMesh;
+            }
             foreach (var triface in triFaces)
             {
                 //calculate tangents //TODO average these based on shared faces.
@@ -157,15 +164,25 @@ namespace renderer.core
             var s = new Vector2(temp1.X, temp2.X);
             var t = new Vector2(temp1.Y, temp2.Y);
 
-            var recip = 1f / ((temp1.X * temp2.Y) - (temp1.Y * temp2.X));
+            var recip = 1.0 / ((temp1.X * temp2.Y) - (temp1.Y * temp2.X));
+            if (double.IsInfinity(recip))
+            {
+                recip = 1.0;
+            }
 
             //these seem exactly the same...
 
-            var udir = Vector3.Multiply(recip, Vector3.Subtract(Vector3.Multiply(temp2.Y, q1), (Vector3.Multiply(temp1.Y, q2))));
-            var vdir = Vector3.Multiply(recip, Vector3.Subtract(Vector3.Multiply(temp1.X, q2), (Vector3.Multiply(temp2.X, q1))));
+            var udir = Vector3.Multiply((float)recip, Vector3.Subtract(Vector3.Multiply(temp2.Y, q1), (Vector3.Multiply(temp1.Y, q2))));
+            var vdir = Vector3.Multiply((float)recip, Vector3.Subtract(Vector3.Multiply(temp1.X, q2), (Vector3.Multiply(temp2.X, q1))));
 
             //var udir = new Vector3((t.Y * q1.X - t.X * q2.X) * recip, (t.Y * q1.Y - t.X * q2.Y) * recip, (t.Y * q1.Z - t.X * q2.Z) * recip);
             //var vdir = new Vector3((s.X * q2.X - s.Y * q1.X) * recip, (s.X * q2.Y - s.Y * q1.Y) * recip, (s.X * q2.Z - s.Y * q1.Z) * recip);
+
+            if (float.IsInfinity(udir.X) || float.IsInfinity(udir.Y) || float.IsInfinity(udir.Z)
+               || float.IsInfinity(vdir.X) || float.IsInfinity(vdir.Y) || float.IsInfinity(vdir.Z))
+            {
+                throw new ArgumentException();
+            }
 
             return (udir, vdir);
 

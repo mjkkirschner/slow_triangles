@@ -70,7 +70,7 @@ namespace Tests
             image.Colors = renderer.Render();
 
             //how many pixels are bluish...
-            Assert.AreEqual(4050, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+            Assert.AreEqual(3735, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
 
             System.IO.File.WriteAllBytes("../../../ShaderRender2.ppm", image.toByteArray());
         }
