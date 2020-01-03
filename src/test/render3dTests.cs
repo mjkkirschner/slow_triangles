@@ -87,7 +87,7 @@ namespace Tests
         public void Prespective_Normal_Map()
         {
 
-            var cameraPos = new Vector3(0, 0, 2);
+            var cameraPos = new Vector3(0, 2, 2);
             var target = new Vector3(0, 0, 0);
             var width = 1024;
             var height = 1024;
@@ -102,7 +102,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport),
+                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -118,7 +118,7 @@ namespace Tests
 
         }
 
-         [Test]
+        [Test]
         public void Prespective_Tex_Map_TinyRenderReference()
         {
 
@@ -136,7 +136,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(view, proj, viewport){LightDirection = new Vector3(1,-1,1)},
+                    Shader = new TextureShader(view, proj, viewport) { LightDirection = new Vector3(1, -1, 1) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
                 mesh);
@@ -170,7 +170,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport){ambientCoef = 10, LightDirection = new Vector3(0,1,0)},
+                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -182,6 +182,52 @@ namespace Tests
             image.Colors = renderer.Render();
             System.IO.File.WriteAllBytes("../../../perspectiveTestNormalHead.ppm", image.toByteArray());
             //Assert.AreEqual(847497, image.Colors.Where(x => x == Color.White).Count());
+
+
+        }
+
+        [Test]
+        public void Prespective_Normal_Map_TinyRenderReferenceAnimation()
+        {
+
+            var cameraPos = new Vector3(-.6f, .6f, 3);
+            var target = new Vector3(0, 0, 0);
+            var width = 2048;
+            var height = 2048;
+            var view = Matrix4x4.CreateLookAt(cameraPos, target, Vector3.UnitY);
+            var proj = Matrix4x4.CreatePerspective(1, 1, 1, 10);
+            var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, width, height);
+
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/tiny_renderer_sample_models/african_head.obj"));
+            var diffuseTex = PNGImage.LoadPNGFromPath("../../../../../geometry_models/tiny_renderer_sample_models/african_head_diffuse2.png");
+            var normalMap = PNGImage.LoadPNGFromPath("../../../../../geometry_models/tiny_renderer_sample_models/african_head_nm_tangent.png");
+
+            var lightvals = Enumerable.Range(0, 11).Select(x => (x / 5.0) - 1.0).ToList();
+
+            var renderable = new Renderable<Mesh>(
+                new NormalMaterial()
+                {
+                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
+                    DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
+                    NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
+                },
+                mesh);
+            var renderer = new Renderer3dGeneric<Mesh>(width, height, Color.White,
+                new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
+
+            for (var i = 0; i < lightvals.Count; i++)
+            {
+                var mat = Matrix4x4.CreateRotationY(0.174533f*3f);
+                var transformedLightDir = Vector3.Transform(renderable.material.Shader.LightDirection,Matrix4x4.Transpose(mat));
+                renderable.material.Shader.LightDirection =transformedLightDir;
+                var image = new ppmImage(width, height, 255);
+                image.Colors = renderer.Render();
+                var path = $"../../../animation1/perspectiveTestNormalHead{i}.ppm";
+                System.IO.FileInfo file = new System.IO.FileInfo(path);
+                file.Directory.Create();
+                System.IO.File.WriteAllBytes(path, image.toByteArray());
+            }
+
 
 
         }

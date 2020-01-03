@@ -16,19 +16,26 @@ namespace renderer._3d
         public int Height { get; private set; }
         public Color[] ImageBuffer { get; private set; }
         public double[] DepthBuffer { get; private set; }
+        private Color fillColor = Color.Black;
 
         public Renderer3dGeneric(int width, int height, Color fillColor, IEnumerable<IEnumerable<Renderable<T>>> renderData)
         {
             this.Width = width;
             this.Height = height;
             this.Scene = renderData;
+            this.fillColor = fillColor;
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
+         
 
         }
 
         public Color[] Render()
         {
+            //cleanup from previous renders
+            ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
+            DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
+
             this.Scene.ToList().ForEach(group =>
                group.ToList().ForEach(renderable =>
                {
@@ -54,12 +61,13 @@ namespace renderer._3d
                            //int scaledZ = (int)((vect.Z * (.5f * 256f)) + (.5f * 256f));
 
                            //if outside clip bounds, we will mark the vert NAN.
-                          /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
+                           /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
+                            {
+                                screenCoords.Add(new Vector3(float.NaN, float.NaN, float.NaN));
+                            }
+                            else
+                          */
                            {
-                               screenCoords.Add(new Vector3(float.NaN, float.NaN, float.NaN));
-                           }
-                           else
-                         */  {
                                screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
 
                            }
@@ -69,7 +77,7 @@ namespace renderer._3d
                        }
                        //draw if not nan.
                        //todo - logic is a bit backward.
-                     //  if (screenCoords.All(x => !float.IsNaN(x.X)))
+                       //  if (screenCoords.All(x => !float.IsNaN(x.X)))
                        {
                            TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, DepthBuffer, ImageBuffer, Width);
 
