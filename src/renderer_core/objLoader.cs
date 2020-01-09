@@ -68,7 +68,27 @@ namespace renderer.core
                     var verts = faceData.Select(x => x.ElementAt(0)).ToArray();
                     var uvs = faceData.Select(x => x.ElementAtOrDefault(1)).ToArray();
                     var normals = faceData.Select(x => x.ElementAtOrDefault(2)).ToArray();
-                    output.Add(new TriangleFace(verts, uvs, normals));
+
+                    //if there are more than 3 verts in this face we have potentially encountered a triangle strip
+                    // like this F 0 1 2 3 - split into two tris - (012) - (023)
+                    if (verts.Count() > 3)
+                    {
+                        output.Add(new TriangleFace(verts.Take(3).ToArray(), uvs.Take(3).ToArray(), normals.Take(3).ToArray()));
+                        for (var i = 3; i < verts.Count(); ++i)
+                            output.Add(new TriangleFace(
+                                new int[] {
+                                     verts[i - 3], verts[i - 1], verts[i] },
+                            new int[] { uvs[i - 3], uvs[i - 1], uvs[i] },
+                            new int[] { normals[i - 3], normals[i - 1], normals[i] }
+                            ));
+                    }
+                    //simple triangle
+                    else
+                    {
+                        output.Add(new TriangleFace(verts, uvs, normals));
+                    }
+
+
                 }
             }
             return output;
@@ -125,10 +145,27 @@ namespace renderer.core
             {
                 return tempMesh;
             }
+
+            if (normals.Count < 1)
+            {
+                //lets calculate some normals
+                for (int triIndex =0; triIndex < triFaces.Count;triIndex++)
+                {
+                    var triface = triFaces[triIndex];
+                    calculateAndSetNormalForTri(ref triface, tempMesh);
+                    triFaces[triIndex] = triface;
+                }
+                //TODO get rid of this.
+                //update this property manually with updated structs
+                tempMesh.Triangles = triFaces;
+                //all verts now have normal indices and some faceted normal data.
+                tempMesh.computeAveragedNormals();
+            }
+
+
             foreach (var triface in triFaces)
             {
-                //calculate tangents //TODO average these based on shared faces.
-                var (tan, binorm) = caluculatetangentSpaceForTri(triface, tempMesh);
+                var (tan, binorm) = calculateTangetSpaceForTri(triface, tempMesh);
                 tempMesh.BiNormals_akaBiTangents.Add(binorm);
                 tempMesh.Tangents.Add(tan);
             }
@@ -136,7 +173,36 @@ namespace renderer.core
             return tempMesh;
         }
 
-        public static (Vector3, Vector3) caluculatetangentSpaceForTri(TriangleFace triangleFace, Mesh mesh)
+        private static void calculateAndSetNormalForTri(ref TriangleFace triangleFace, Mesh mesh)
+        {
+            //if the normal list is empty for this mesh or null - set it to be the same size
+            //as the list of verts. we'll generate on normal per vert.
+            if (mesh.VertexNormalData == null || mesh.VertexNormalData.Count < 1)
+            {
+                mesh.VertexNormalData = Enumerable.Repeat(Vector3.Zero, mesh.VertexData.Count()).ToList();
+            }
+
+            var triVerts = triangleFace.vertIndexList.Select(ind => mesh.VertexData[ind - 1].ToVector3()).ToArray();
+            var a = triVerts[0];
+            var b = triVerts[1];
+            var c = triVerts[2];
+
+            var calculatedNormal = Vector3.Normalize(Vector3.Cross((b - a), (c - a)));
+            //temporarily we will add these normals to the normals array - we'll average them later.
+            var inds = new List<int>();
+            foreach (var vertIndex in triangleFace.vertIndexList)
+            {
+                mesh.VertexNormalData[vertIndex - 1] = calculatedNormal;
+            }
+            //copy the array.
+            //TODO because this is a struct, it does not end up modifying the tris we set in mesh...
+            //bad design.
+            triangleFace.NormalIndexList = triangleFace.vertIndexList.ToArray();
+            
+
+        }
+
+        private static (Vector3, Vector3) calculateTangetSpaceForTri(TriangleFace triangleFace, Mesh mesh)
         {
             var triVerts = triangleFace.vertIndexList.Select(ind => mesh.VertexData[ind - 1].ToVector3()).ToArray();
             var uvs = triangleFace.UVIndexList.Select(ind => mesh.VertexUVData[ind - 1]).ToArray();
@@ -164,6 +230,7 @@ namespace renderer.core
             var s = new Vector2(temp1.X, temp2.X);
             var t = new Vector2(temp1.Y, temp2.Y);
 
+            //TODO are uv coords incorrect?
             var recip = 1.0 / ((temp1.X * temp2.Y) - (temp1.Y * temp2.X));
             if (double.IsInfinity(recip))
             {

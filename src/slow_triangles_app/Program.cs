@@ -1,7 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
+using renderer._3d;
 using renderer.core;
+using renderer.dataStructures;
+using renderer.materials;
+using renderer.shaders;
+using renderer.utilities;
 
 namespace slow_triangles
 {
@@ -10,13 +17,6 @@ namespace slow_triangles
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            var image = new ppmImage(640, 480, 255);
-            Enumerable.Range(0, 640).ToList().ForEach(x =>
-            {
-                image.setPixel(x, 0, Color.Red);
-
-            });
-            System.IO.File.WriteAllBytes("../image.ppm",image.toByteArray());
 
         }
     }

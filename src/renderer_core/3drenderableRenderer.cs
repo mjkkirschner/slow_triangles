@@ -26,7 +26,7 @@ namespace renderer._3d
             this.fillColor = fillColor;
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
-         
+
 
         }
 
@@ -46,19 +46,13 @@ namespace renderer._3d
                    var triIndex = 0;
                    foreach (var triFace in renderable.RenderableObject.Triangles)
                    {
+                       Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
                        //transform verts to screenspace
                        var screenCoords = new List<Vector3>();
                        var localVertIndex = 0;
                        foreach (var meshVertInde in triFace.vertIndexList)
                        {
                            var vect = material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
-                           //Console.WriteLine(vect);
-                           //TODO this should be done with a viewport matrix.
-                           //int scaledX = (int)((vect.X * (.5 * (float)Width)) + (.5 * (float)Width));
-                           //for some reason to make y scale correctly, we need to invert the values during scaling.
-                           //int scaledY = (int)((vect.Y * -(.5 * (float)Height)) + (.5 * (float)Height));
-
-                           //int scaledZ = (int)((vect.Z * (.5f * 256f)) + (.5f * 256f));
 
                            //if outside clip bounds, we will mark the vert NAN.
                            /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)

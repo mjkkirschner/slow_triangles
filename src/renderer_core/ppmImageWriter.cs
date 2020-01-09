@@ -4,13 +4,14 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using renderer.utilities;
 
 namespace renderer.core
 {
     /// <summary>
     /// I am too lazy to install libgdiplus or to use imagesharp.
     /// </summary>
-    public class ppmImage
+    public class ppmImage : IImage
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -97,8 +98,10 @@ namespace renderer.core
             return (headerAsBytes.Concat(data)).ToArray();
         }
 
-
-
+        public void Flip()
+        {
+            ListExtensions.Flip(Colors, Height, Width);
+        }
     }
 
 }

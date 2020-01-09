@@ -107,7 +107,7 @@ namespace renderer.dataStructures
 
         public Color GetColorAtUV(Vector2 UV)
         {
-            var x = (1.0f - UV.X) * Width;
+            var x =  UV.X * Width;
             var y = (1.0f - UV.Y) * Height;
 
             return ColorData[Width * (int)y + (int)x];
@@ -234,6 +234,31 @@ namespace renderer.dataStructures
 
         }
 
+        public void computeAveragedNormals()
+        {
+            var averagedNormals = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexNormalData.Count).ToList();
+
+            foreach (var tri in Triangles)
+            {
+                //we made sure that the normals have the same index as the verts so we can use either index.
+                foreach (var vert in tri.vertIndexList)
+                {
+                    averagedNormals[vert - 1] = Vector3.Add(averagedNormals[vert - 1], this.VertexNormalData[vert - 1]);
+                }
+            }
+
+            //one final pass to set all the normal data per vert.
+            foreach (var tri in Triangles)
+            {
+                foreach (var vert in tri.vertIndexList)
+                {
+                    this.VertexNormalData[vert - 1] = Vector3.Normalize(averagedNormals[vert - 1]);
+                }
+            }
+
+
+        }
+
         //TODO should be called as part of constructor or setter...
         public void computeAveragedTangents()
         {
@@ -247,7 +272,6 @@ namespace renderer.dataStructures
                 {
                     averagedTangents[vert - 1] = Vector3.Add(averagedTangents[vert - 1], this.Tangents[triIndex]);
                     averagedBiNormals[vert - 1] = Vector3.Add(averagedBiNormals[vert - 1], this.BiNormals_akaBiTangents[triIndex]);
-
                 }
                 triIndex++;
             }
@@ -271,7 +295,10 @@ namespace renderer.dataStructures
                 if (float.IsNaN(t.X) || float.IsNaN(t.Y) || float.IsNaN(t.Z)
                 || float.IsNaN(b.X) || float.IsNaN(b.Y) || float.IsNaN(b.Z))
                 {
-                    throw new ArgumentException();
+                    //just default to two ws vector...
+                    t = new Vector3(1, 0, 0);
+                    b = new Vector3(0, 1, 0);
+                    Console.WriteLine($"issue with vertex {i} when computing tangents");
                 }
 
                 this.VertTangents.Add(t);

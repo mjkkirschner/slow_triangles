@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -17,6 +18,26 @@ namespace renderer.utilities
                 .GroupBy(x => x.Index / groupSize)
                 .Select(x => x.Select(v => v.Value).ToList())
                 .ToList();
+        }
+
+        /// <summary>
+        /// flips an array vertically and modifies the input array.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="height"></param>
+        /// <param name="width"></param>
+        public static void Flip(IList array, int height, int width)
+        {
+            for (int i = 0; i < height / 2; ++i)
+            {
+                int k = height - 1 - i;
+                for (int j = 0; j < width; ++j)
+                {
+                    var temp = array[i * width + j];
+                    array[i * width + j] = array[k * width + j];
+                    array[k * width + j] = temp;
+                }
+            }
         }
     }
 

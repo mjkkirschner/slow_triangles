@@ -96,7 +96,7 @@ namespace renderer.core
     /// <summary>
     /// small subset of png decode functionality.
     /// </summary>
-    public class PNGImage
+    public class PNGImage : IImage
     {
         private ImageHeader Header;
         public byte[] data;
@@ -109,7 +109,7 @@ namespace renderer.core
         {
             get
             {
-                return ListExtensions.Split<Byte>(data.ToList(), (uint)bytesPerPixel).Select(pixel => Color.FromArgb(pixel[3], pixel[0], pixel[1], pixel[2])).ToArray();
+                return ListExtensions.Split<Byte>(data.ToList(), (uint)bytesPerPixel).Select(pixel => Color.FromArgb(((Header.ColorType & ColorType.ALPHA) != 0) ? pixel[3] : 1, pixel[0], pixel[1], pixel[2])).ToArray();
             }
         }
 
@@ -398,6 +398,9 @@ namespace renderer.core
            (CompressionType)CompresionMethod, (FilterMethod)filter, interlaced);
         }
 
-
+        public void Flip()
+        {
+            ListExtensions.Flip(Colors, Height, Width);
+        }
     }
 }
