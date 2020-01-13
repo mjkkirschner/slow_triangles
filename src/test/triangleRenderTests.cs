@@ -35,8 +35,8 @@ namespace Tests
             renderer.VertexData = verts.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(677784, image.colors.Where(x => x == Color.Red).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(677784, image.Colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../triangleTest1_teapot.ppm", image.toByteArray());
         }
@@ -59,8 +59,8 @@ namespace Tests
             renderer.VertexData = mesh.VertexData.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(741639, image.colors.Where(x => x == Color.Red).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(741639, image.Colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTest1.ppm", image.toByteArray());
         }
@@ -80,8 +80,8 @@ namespace Tests
             renderer.VertexData = verts.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(741639, image.colors.Where(x => x == Color.Red).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(741639, image.Colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTestVertsDirect.ppm", image.toByteArray());
         }
@@ -104,8 +104,8 @@ namespace Tests
             renderer.VertexData = mesh.VertexData.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(736261, image.colors.Where(x => x == Color.Red).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(736261, image.Colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../knotTest3.ppm", image.toByteArray());
         }
@@ -125,8 +125,8 @@ namespace Tests
             renderer.VertexData = mesh.VertexData.Select(x => new Vector3(x.X, x.Y, x.Z)).ToArray();
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(677784, image.colors.Where(x => x == Color.Red).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(677784, image.Colors.Where(x => x == Color.Red).Count());
 
             System.IO.File.WriteAllBytes("../../../teapotTest2.ppm", image.toByteArray());
         }

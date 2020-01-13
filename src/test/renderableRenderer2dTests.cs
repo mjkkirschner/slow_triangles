@@ -39,8 +39,8 @@ namespace Tests
             var renderer = new Renderer2dGeneric<Mesh>(1024, 768, Color.Black, new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-            Assert.AreEqual(736261, image.colors.Where(x => x == Color.Black).Count());
+            image.Colors = renderer.Render();
+            Assert.AreEqual(736261, image.Colors.Where(x => x == Color.Black).Count());
 
             System.IO.File.WriteAllBytes("../../../ShaderRender1.ppm", image.toByteArray());
         }
@@ -60,19 +60,19 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(),
-                    DiffuseTexture = new Texture2d(ppm.width, ppm.height, ppm.colors)
+                    Shader = new TextureShader(Matrix4x4.Identity,Matrix4x4.Identity,Matrix4x4.Identity),
+                    DiffuseTexture = new Texture2d(ppm.Width, ppm.Height, ppm.Colors)
                 },
                 mesh);
             var renderer = new Renderer2dGeneric<Mesh>(1024, 768, Color.Black, new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
 
             var image = new ppmImage(1024, 768, 255);
-            image.colors = renderer.Render();
-
-            //how many pixels are bluish...
-            Assert.AreEqual(4050, image.colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+            image.Colors = renderer.Render();
 
             System.IO.File.WriteAllBytes("../../../ShaderRender2.ppm", image.toByteArray());
+             //how many pixels are bluish...
+            Assert.AreEqual(4053, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+
         }
 
 

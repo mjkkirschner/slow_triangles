@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Linq;
 using renderer.utilities;
+using System;
 
 namespace renderer.dataStructures
 {
@@ -24,6 +25,77 @@ namespace renderer.dataStructures
         }
     }
 
+    public class Matrix3x3
+    {
+
+        //
+        // Summary:
+        //     The first element of the first row.
+        public float M11;
+
+        //
+        // Summary:
+        //     The second element of the first row.
+        public float M12;
+
+        //
+        // Summary:
+        //     The third element of the first row.
+        public float M13;
+
+
+        //
+        // Summary:
+        //     The first element of the  second row.
+        public float M21;
+
+        //
+        // Summary:
+        //     The second element of the  second row.
+        public float M22;
+
+        //
+        // Summary:
+        //     The third element of the  second row.
+        public float M23;
+
+
+        //
+        // Summary:
+        //     The first element of the third row.
+        public float M31;
+
+        //
+        // Summary:
+        //     The second element of the third row.
+        public float M32;
+
+        //
+        // Summary:
+        //     The third element of the third row.
+        public float M33;
+
+
+        public Matrix3x3(Matrix4x4 mat4)
+        {
+            this.M11 = mat4.M11;
+            this.M12 = mat4.M12;
+            this.M13 = mat4.M13;
+
+            this.M21 = mat4.M21;
+            this.M22 = mat4.M22;
+            this.M23 = mat4.M23;
+
+            this.M31 = mat4.M31;
+            this.M32 = mat4.M32;
+            this.M33 = mat4.M33;
+
+        }
+
+
+
+    }
+
 
     public class Texture2d
     {
@@ -35,8 +107,8 @@ namespace renderer.dataStructures
 
         public Color GetColorAtUV(Vector2 UV)
         {
-            var x = UV.X * Width;
-            var y = UV.Y * Height;
+            var x =  UV.X * Width;
+            var y = (1.0f - UV.Y) * Height;
 
             return ColorData[Width * (int)y + (int)x];
         }
@@ -142,12 +214,109 @@ namespace renderer.dataStructures
         public IList<Vector3> VertexNormalData { get; set; }
         public IList<Vector2> VertexUVData { get; set; }
 
-        public Mesh(IList<TriangleFace> tris, IList<Vector4> verts, IList<Vector3> normals, IList<Vector2> uvs)
+        public IList<Vector3> BiNormals_akaBiTangents { get; set; }
+        public IList<Vector3> Tangents { get; set; }
+
+        public IList<Vector3> VertTangents { get; set; }
+        public IList<Vector3> VertBiNormals { get; set; }
+
+
+        public Mesh(IList<TriangleFace> tris, IList<Vector4> verts, IList<Vector3> normals, IList<Vector2> uvs, IList<Vector3> binormals = null, IList<Vector3> tangents = null)
         {
             this.Triangles = tris;
             this.VertexData = verts;
             this.VertexNormalData = normals;
             this.VertexUVData = uvs;
+            this.BiNormals_akaBiTangents = binormals ?? new List<Vector3>();
+            this.Tangents = tangents ?? new List<Vector3>();
+            validateMesh();
+
+
+        }
+
+        public void computeAveragedNormals()
+        {
+            var averagedNormals = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexNormalData.Count).ToList();
+
+            foreach (var tri in Triangles)
+            {
+                //we made sure that the normals have the same index as the verts so we can use either index.
+                foreach (var vert in tri.vertIndexList)
+                {
+                    averagedNormals[vert - 1] = Vector3.Add(averagedNormals[vert - 1], this.VertexNormalData[vert - 1]);
+                }
+            }
+
+            //one final pass to set all the normal data per vert.
+            foreach (var tri in Triangles)
+            {
+                foreach (var vert in tri.vertIndexList)
+                {
+                    this.VertexNormalData[vert - 1] = Vector3.Normalize(averagedNormals[vert - 1]);
+                }
+            }
+
+
+        }
+
+        //TODO should be called as part of constructor or setter...
+        public void computeAveragedTangents()
+        {
+            var averagedTangents = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexData.Count).ToList();
+            var averagedBiNormals = Enumerable.Repeat(new Vector3(0, 0, 0), this.VertexData.Count).ToList();
+            var triIndex = 0;
+
+            foreach (var tri in Triangles)
+            {
+                foreach (var vert in tri.vertIndexList)
+                {
+                    averagedTangents[vert - 1] = Vector3.Add(averagedTangents[vert - 1], this.Tangents[triIndex]);
+                    averagedBiNormals[vert - 1] = Vector3.Add(averagedBiNormals[vert - 1], this.BiNormals_akaBiTangents[triIndex]);
+                }
+                triIndex++;
+            }
+
+            this.VertBiNormals = new List<Vector3>();
+            this.VertTangents = new List<Vector3>();
+            for (var i = 0; i < averagedBiNormals.Count; i++)
+            {
+                var t = Vector3.Normalize(averagedTangents[i]);
+                var b = Vector3.Normalize(averagedBiNormals[i]);
+                var n = this.VertexNormalData[i];
+
+                t = Vector3.Normalize(t - (n * Vector3.Dot(n, t)));
+
+                if (Vector3.Dot(Vector3.Cross(n, t), b) < 0.0f)
+                {
+                    t = t * -1.0f;
+                }
+                //check for degenerate data...
+                //TODO must be a better solution
+                if (float.IsNaN(t.X) || float.IsNaN(t.Y) || float.IsNaN(t.Z)
+                || float.IsNaN(b.X) || float.IsNaN(b.Y) || float.IsNaN(b.Z))
+                {
+                    //just default to two ws vector...
+                    t = new Vector3(1, 0, 0);
+                    b = new Vector3(0, 1, 0);
+                    Console.WriteLine($"issue with vertex {i} when computing tangents");
+                }
+
+                this.VertTangents.Add(t);
+                this.VertBiNormals.Add(b);
+            }
+        }
+
+        private void validateMesh()
+        {
+            var counts = Enumerable.Repeat(0, this.VertexData.Count).ToList();
+            foreach (var triFace in Triangles)
+            {
+                foreach (var vert in triFace.vertIndexList)
+                {
+                    counts[vert - 1] = counts[vert - 1] + 1;
+                }
+            }
+            Console.WriteLine($"{counts.Where(x => x < 3).Count()} verts with no other triangles sharing this vert. ");
         }
     }
 

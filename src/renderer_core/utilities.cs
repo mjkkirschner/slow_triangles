@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -17,6 +18,34 @@ namespace renderer.utilities
                 .GroupBy(x => x.Index / groupSize)
                 .Select(x => x.Select(v => v.Value).ToList())
                 .ToList();
+        }
+
+        /// <summary>
+        /// flips an array vertically and modifies the input array.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="height"></param>
+        /// <param name="width"></param>
+        public static void Flip(IList array, int height, int width)
+        {
+            for (int i = 0; i < height / 2; ++i)
+            {
+                int k = height - 1 - i;
+                for (int j = 0; j < width; ++j)
+                {
+                    var temp = array[i * width + j];
+                    array[i * width + j] = array[k * width + j];
+                    array[k * width + j] = temp;
+                }
+            }
+        }
+    }
+
+    public static class ColorExtensions
+    {
+        public static Vector3 ToVector3(this Color color)
+        {
+            return new Vector3(2f * (color.R / 255f) - 1f, 2f * (color.G / 255f) - 1f, 2 * (color.B / 255f) - 1f);
         }
     }
 
@@ -56,6 +85,19 @@ namespace renderer.utilities
                 outVector.Z /= w;
             }
             return outVector;
+        }
+
+        public static Vector3 ToVector3(this Vector4 vec)
+        {
+            return new Vector3(vec.X, vec.Y, vec.Z);
+        }
+
+        public static Vector3 Transform(this Vector3 vec, Matrix3x3 mat)
+        {
+            var x = mat.M11 * vec.X + mat.M12 * vec.Y + mat.M13 * vec.Z;
+            var y = mat.M21 * vec.X + mat.M22 * vec.Y + mat.M23 * vec.Z;
+            var z = mat.M31 * vec.X + mat.M32 * vec.Y + mat.M33 * vec.Z;
+            return new Vector3(x, y, z);
         }
 
 
