@@ -46,7 +46,7 @@ namespace renderer._3d
                    var triIndex = 0;
                    foreach (var triFace in renderable.RenderableObject.Triangles)
                    {
-                       Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
+                      // Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
                        //transform verts to screenspace
                        var screenCoords = new List<Vector3>();
                        var localVertIndex = 0;
