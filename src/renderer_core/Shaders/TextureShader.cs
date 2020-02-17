@@ -81,7 +81,6 @@ namespace renderer.shaders
                  (int)Math.Min(ambientCoef + (diffColor.R * intensity), 255),
                  (int)Math.Min(ambientCoef + (diffColor.G * intensity), 255),
                  (int)Math.Min(ambientCoef + (diffColor.B * intensity), 255));
-            //color = Color.FromArgb((int)(interpolatedLightVector.X * 255f), (int)(interpolatedLightVector.Y * 255f), (int)(interpolatedLightVector.Z * 255f));
 
             return true;
         }

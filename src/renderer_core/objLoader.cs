@@ -20,7 +20,7 @@ namespace renderer.core
         public static List<Vector4> LoadVertsFromObjAtPath(FileInfo path)
         {
             var text = File.ReadAllText(path.FullName);
-            var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = text.Split(new string[] { "\n" }, StringSplitOptions.None);
             var output = new List<Vector4>();
             foreach (var line in lines)
             {
@@ -47,7 +47,7 @@ namespace renderer.core
         public static List<TriangleFace> LoadTrisFromObjAtPath(FileInfo path)
         {
             var text = File.ReadAllText(path.FullName);
-            var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = text.Split(new string[] { "\n" }, StringSplitOptions.None);
 
             var output = new List<TriangleFace>();
             foreach (var line in lines)
@@ -99,7 +99,7 @@ namespace renderer.core
             var triFaces = LoadTrisFromObjAtPath(path);
 
             var text = File.ReadAllText(path.FullName);
-            var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+            var lines = text.Split(new string[] { "\n" }, StringSplitOptions.None);
 
             var verts = new List<Vector4>();
             var normals = new List<Vector3>();

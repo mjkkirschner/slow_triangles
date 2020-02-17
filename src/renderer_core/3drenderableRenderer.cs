@@ -6,6 +6,7 @@ using System.Numerics;
 using renderer.dataStructures;
 using renderer.interfaces;
 using renderer.utilities;
+using renderer_core.dataStructures;
 
 namespace renderer._3d
 {
@@ -16,7 +17,11 @@ namespace renderer._3d
         public int Height { get; private set; }
         public Color[] ImageBuffer { get; private set; }
         public double[] DepthBuffer { get; private set; }
+        public List<ILight> Lights { get; set; }
+
+
         private Color fillColor = Color.Black;
+
 
         public Renderer3dGeneric(int width, int height, Color fillColor, IEnumerable<IEnumerable<Renderable<T>>> renderData)
         {
@@ -26,8 +31,6 @@ namespace renderer._3d
             this.fillColor = fillColor;
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
-
-
         }
 
         public Color[] Render()
@@ -36,52 +39,82 @@ namespace renderer._3d
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
 
+            //renders a single pass using the material stored on the renderable
+            renderPass();
+            //lets render our lighting passes, here we will use the shaders specific to each light type...
+            foreach(var light in Lights)
+            {
+                var 
+                renderPass()
+
+            }
+
+
+
+            return ImageBuffer.ToArray();
+        }
+
+        private void renderPass()
+        {
             this.Scene.ToList().ForEach(group =>
                group.ToList().ForEach(renderable =>
                {
                    //for now only one shader.
                    var material = renderable.material;
 
-                   //render
-                   var triIndex = 0;
-                   foreach (var triFace in renderable.RenderableObject.Triangles)
-                   {
-                      // Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
-                       //transform verts to screenspace
-                       var screenCoords = new List<Vector3>();
-                       var localVertIndex = 0;
-                       foreach (var meshVertInde in triFace.vertIndexList)
-                       {
-                           var vect = material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
-
-                           //if outside clip bounds, we will mark the vert NAN.
-                           /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
-                            {
-                                screenCoords.Add(new Vector3(float.NaN, float.NaN, float.NaN));
-                            }
-                            else
-                          */
-                           {
-                               screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
-
-                           }
-
-                           localVertIndex++;
-
-                       }
-                       //draw if not nan.
-                       //todo - logic is a bit backward.
-                       //  if (screenCoords.All(x => !float.IsNaN(x.X)))
-                       {
-                           TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, DepthBuffer, ImageBuffer, Width);
-
-                       }
-                       triIndex = triIndex + 1;
-                   }
+                   renderRenderableWithMaterial(renderable, material);
                })
                );
+        }
 
-            return ImageBuffer.ToArray();
+        private void renderPass(Material material)
+        {
+            this.Scene.ToList().ForEach(group =>
+               group.ToList().ForEach(renderable =>
+               {
+                   renderRenderableWithMaterial(renderable, material);
+               })
+               );
+        }
+
+        private void renderRenderableWithMaterial(Renderable<T> renderable, Material material)
+        {
+            //render
+            var triIndex = 0;
+            foreach (var triFace in renderable.RenderableObject.Triangles)
+            {
+                // Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
+                //transform verts to screenspace
+                var screenCoords = new List<Vector3>();
+                var localVertIndex = 0;
+                foreach (var meshVertInde in triFace.vertIndexList)
+                {
+                    var vect = material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
+
+                    //if outside clip bounds, we will mark the vert NAN.
+                    /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
+                     {
+                         screenCoords.Add(new Vector3(float.NaN, float.NaN, float.NaN));
+                     }
+                     else
+                   */
+                    {
+                        screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
+
+                    }
+
+                    localVertIndex++;
+
+                }
+                //draw if not nan.
+                //todo - logic is a bit backward.
+                //  if (screenCoords.All(x => !float.IsNaN(x.X)))
+                {
+                    TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, DepthBuffer, ImageBuffer, Width);
+
+                }
+                triIndex = triIndex + 1;
+            }
         }
     }
 

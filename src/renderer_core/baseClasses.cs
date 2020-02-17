@@ -147,7 +147,7 @@ namespace renderer.dataStructures
     //TODO this type likely to be replaced after implementing materials/shaders / materialMeshes.
     //could also flip architecture to composable style.
 
-    public class Shader
+    public class Shader:IShader
     {
         public Vector3 LightDirection = new Vector3(0, -1, 0);
         protected float[] varying_intensity = new float[3];
@@ -175,11 +175,17 @@ namespace renderer.dataStructures
         }
     }
 
+    public interface IShader
+    {
+        Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex);
+        bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color);
+    }
+
     //TODO currently, has no use, will be used to set specific maps and parameters for a specified shader.
     //potentially can use reflection or description objects.
     public class Material
     {
-        public Shader Shader { get; set; }
+        public IShader Shader { get; set; }
     }
 
 
