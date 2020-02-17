@@ -243,7 +243,8 @@ namespace renderer.utilities
 
 
         //TODO should probably be Vector4
-        public static void drawTriangle(int triIndex, Vector3[] screenCords, Material material, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
+        public static void drawTriangle(int triIndex, Vector3[] screenCords, Material material, double[] zbuffer,
+        Color[] imageBuffer, int imageBufferWidth, byte[] previewBuffer = null)
         {
             var minx = screenCords.Select(x => x.X).Min();
             var miny = screenCords.Select(x => x.Y).Min();
@@ -259,7 +260,6 @@ namespace renderer.utilities
 
                        Enumerable.Range((int)miny, (int)(maxy - miny) + 2).ToList().ForEach(y =>
                        {
-
                            var IsInsideTriangle = pixelIsInsideTriangle(x, y, screenCords);
                            var bary = TriangleExtensions.BaryCoordinates2(x, y,
                                A.ToVector2(), B.ToVector2(), C.ToVector2());
@@ -279,6 +279,17 @@ namespace renderer.utilities
 
                                        imageBuffer[flatIndex] = diffColor;
                                        zbuffer[flatIndex] = z;
+                                       if (previewBuffer != null)
+                                       {
+                                           var height = (int)(imageBuffer.Length/ imageBufferWidth);
+                                           var midheight = height/2;
+                                           var newY = y - midheight
+                                           var flatByteOffset = (imageBufferWidth * 4) * (int)y + (int)x*4;
+                                           previewBuffer[flatByteOffset] = diffColor.R;
+                                           previewBuffer[flatByteOffset + 1] = diffColor.G;
+                                           previewBuffer[flatByteOffset + 2] = diffColor.B;
+                                           previewBuffer[flatByteOffset + 3] = diffColor.A;
+                                       }
                                    }
                                }
                            }
