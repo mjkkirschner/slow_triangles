@@ -10,6 +10,7 @@ using renderer.materials;
 using renderer.shaders;
 using renderer.utilities;
 using System.Linq;
+using renderer_core.dataStructures;
 
 namespace Tests
 {
@@ -41,7 +42,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 1f, 1f) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, uniform_dirLight = new DirectionalLight(new Vector3(0, 1, 1), false, Color.White) },
+
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -77,7 +79,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 30, LightDirection = new Vector3(0, 0, 1f) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) },
+
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },

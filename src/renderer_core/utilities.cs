@@ -61,6 +61,11 @@ namespace renderer.utilities
             return new Vector3(vec.X, vec.Y, Z);
         }
 
+        public static Color ToColor(this Vector3 vec)
+        {
+            return Color.FromArgb((int)vec.X, (int)vec.Y, (int)vec.Z);
+        }
+
         public static Vector2 ToVector2(this Vector3 vec)
         {
             return new Vector2(vec.X, vec.Y);

@@ -6,6 +6,7 @@ using System.Numerics;
 using renderer.dataStructures;
 using renderer.interfaces;
 using renderer.utilities;
+using renderer_core.dataStructures;
 
 namespace renderer._3d
 {
@@ -16,7 +17,10 @@ namespace renderer._3d
         public int Height { get; private set; }
         public Color[] ImageBuffer { get; private set; }
         public double[] DepthBuffer { get; private set; }
+        public List<ILight> Lights { get; set; }
+
         private Color fillColor = Color.Black;
+
 
         public Renderer3dGeneric(int width, int height, Color fillColor, IEnumerable<IEnumerable<Renderable<T>>> renderData)
         {

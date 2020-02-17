@@ -11,6 +11,7 @@ using renderer._3d;
 using renderer.materials;
 using renderer.shaders;
 using System.IO;
+using renderer_core.dataStructures;
 
 namespace Tests
 {
@@ -72,7 +73,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(view, proj, viewport),
+                    Shader = new Unlit_TextureShader(view, proj, viewport),
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors)
                 },
                 mesh);
@@ -106,7 +107,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, 
+                        uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -143,7 +145,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(view, proj, viewport) { LightDirection = new Vector3(1, -1, 1) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, uniform_dirLight = new DirectionalLight(new Vector3(1, -1, 1), false, Color.White) },
+
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
                 mesh);
@@ -180,7 +183,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) },
+
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -214,7 +218,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(view, proj, viewport) { LightDirection = new Vector3(0, 0, 1) },
+                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
                 mesh);

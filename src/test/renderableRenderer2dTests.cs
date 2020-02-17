@@ -60,7 +60,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new TextureShader(Matrix4x4.Identity,Matrix4x4.Identity,Matrix4x4.Identity),
+                    Shader = new Unlit_TextureShader(Matrix4x4.Identity,Matrix4x4.Identity,Matrix4x4.Identity),
                     DiffuseTexture = new Texture2d(ppm.Width, ppm.Height, ppm.Colors)
                 },
                 mesh);
