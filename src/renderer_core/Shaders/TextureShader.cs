@@ -116,21 +116,15 @@ namespace renderer.shaders
             var NormX = varying_normal[0].X * baryCoords.X + varying_normal[1].X * baryCoords.Y + varying_normal[2].X * baryCoords.Z;
             var NormY = varying_normal[0].Y * baryCoords.X + varying_normal[1].Y * baryCoords.Y + varying_normal[2].Y * baryCoords.Z;
             var NormZ = varying_normal[0].Z * baryCoords.X + varying_normal[1].Z * baryCoords.Y + varying_normal[2].Z * baryCoords.Z;
-            
-           // var intensity = ambient;
+
             var interpolatedNormal = new Vector3(NormX, NormY, NormZ);
 
             //calculate directional light intensity using normal
-            var normaldotLight = Vector3.Dot(interpolatedNormal, uniform_dirLight.Direction);
-            var lightColorContrib = Vector3.Multiply(uniform_dirLight.Color.ToVector3(), 1.0f/*intensity*/) * normaldotLight;
-
-
-            var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
-            color = Color.FromArgb((int)(diffColor.R + uniform_ambient), (int)(diffColor.G + uniform_ambient), (int)(diffColor.B + uniform_ambient));
-            //multiply diffuseColor from tex (and ambient) by the light color from directional light.
-            color = (color.ToVector3()
-                        * Color.FromArgb(255, (int)(lightColorContrib.X*255), (int)(lightColorContrib.Y*255), (int)(lightColorContrib.Z*255)).ToVector3())
-                                .ToColor();
+            var normaldotLight = Math.Clamp(Vector3.Dot(Vector3.Normalize(interpolatedNormal), Vector3.Normalize(uniform_dirLight.Direction)), 0, 1);
+            var lightColorContrib = (Vector3.Multiply(uniform_dirLight.Color.ToVector3(), .5f/*intensity*/) * (normaldotLight)).ToColor();
+            var texColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
+            var result = (lightColorContrib.ToVector3() + (new Vector3(uniform_ambient, uniform_ambient, uniform_ambient)) * texColor.ToVector3()).ToColor();
+            color = result;
             return true;
         }
 
@@ -147,10 +141,10 @@ namespace renderer.shaders
     /// </summary>
     public class Unlit_TextureShader : Base3dShader
     {
-        public int uniform_ambient = 5;
+        public float uniform_ambient = 1.0f;
         protected Vector2[] varying_UVCoord = new Vector2[3];
 
-     
+
         public override Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var currentNormal = mesh.VertexNormalData[mesh.Triangles[triangleIndex].NormalIndexList[vertIndex] - 1];
@@ -162,7 +156,7 @@ namespace renderer.shaders
 
         public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-            
+
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
 

@@ -107,8 +107,8 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, 
-                        uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) },
+                    Shader = new Lit_TextureShader(view, proj, viewport) { uniform_ambient = .5f, 
+                        uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },

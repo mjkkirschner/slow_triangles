@@ -43,9 +43,15 @@ namespace renderer.utilities
 
     public static class ColorExtensions
     {
+        /// <summary>
+        /// Converts Color to Vector - does not normalize the vector. will be in range 0-255 for each component
+        /// in RGB XYZ order.
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
         public static Vector3 ToVector3(this Color color)
         {
-            return new Vector3(2f * (color.R / 255f) - 1f, 2f * (color.G / 255f) - 1f, 2 * (color.B / 255f) - 1f);
+            return new Vector3((color.R),  (color.G), (color.B) );
         }
     }
 
@@ -63,7 +69,8 @@ namespace renderer.utilities
 
         public static Color ToColor(this Vector3 vec)
         {
-            return Color.FromArgb((int)vec.X, (int)vec.Y, (int)vec.Z);
+            //clamp these values
+            return Color.FromArgb(Math.Clamp((int)vec.X,0,255), Math.Clamp((int)vec.Y,0,255), Math.Clamp((int)vec.Z,0,255));
         }
 
         public static Vector2 ToVector2(this Vector3 vec)
@@ -278,7 +285,8 @@ namespace renderer.utilities
                                if (flatIndex < imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
                                {
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
-                                   Color diffColor;
+                                   //TODO pass in fill color...
+                                   Color diffColor = Color.Teal;
                                    if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, ref diffColor))
                                    {
 
