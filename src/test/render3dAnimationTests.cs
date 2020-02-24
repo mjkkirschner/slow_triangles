@@ -46,7 +46,9 @@ namespace Tests
                 new NormalMaterial()
                 {
                     Shader = new Lit_TextureShader(view, proj, viewport) { uniform_ambient = .5f, 
-                    uniform_dirLight = new DirectionalLight(new Vector3(0, 0, 1),false,Color.Red)},
+                    uniform_light_array = new ILight[]
+                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) }
+                    },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
@@ -57,8 +59,8 @@ namespace Tests
             for (var i = 0; i < lightvals.Count; i++)
             {
                 var mat = Matrix4x4.CreateRotationY(0.174533f * 3f);
-                var transformedLightDir = Vector3.Transform((renderable.material.Shader as Lit_TextureShader).uniform_dirLight.Direction, Matrix4x4.Transpose(mat));
-                (renderable.material.Shader as Lit_TextureShader).uniform_dirLight.Direction = transformedLightDir;
+                var transformedLightDir = Vector3.Transform(((renderable.material.Shader as Lit_TextureShader).uniform_light_array[0] as DirectionalLight).Direction, Matrix4x4.Transpose(mat));
+                ((renderable.material.Shader as Lit_TextureShader).uniform_light_array[0] as DirectionalLight).Direction = transformedLightDir;
                 var image = new ppmImage(width, height, 255);
                 image.Colors = renderer.Render();
                 image.Flip();

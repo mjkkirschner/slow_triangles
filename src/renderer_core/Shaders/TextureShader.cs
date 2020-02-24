@@ -151,7 +151,7 @@ namespace renderer.shaders
 
                 var L = Vector3.Normalize(light.Direction); // directional light vector is just the light direction... position is irrelevant.
                 var Eye = (Vector3.Normalize(uniform_cam_world_pos - interpolatedV));  // we are in Eye Coordinates, so EyePos is (0,0,0).
-                var Reflect = Vector3.Normalize(reflect(-L, interpolatedNormal));
+                var Reflect = (reflect(-L, interpolatedNormal));
 
                 //make up some terms
                 var lightIntensity = 1;
@@ -165,7 +165,7 @@ namespace renderer.shaders
                 Vector3 ambientTerm = (new Vector3(uniform_ambient, uniform_ambient, uniform_ambient)) * diffColor.ToVector3();
 
                 //spec
-                var matShiny = 500f;
+                var matShiny = 1024f;
                 var lightSpecColor = Color.White;
                 var materiLSpecColor = Color.White;
                 var KS = 1.0f;

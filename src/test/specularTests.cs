@@ -39,7 +39,7 @@ namespace Tests
                 {
                     Shader = new Lit_TextureShader(view, proj, viewport)
                     {
-                        uniform_ambient = 0f,
+                        uniform_ambient = .5f,
                         uniform_light_array = new ILight[]
                             { new DirectionalLight(new Vector3(0, 0, 1), false, Color.White) }
                     },
