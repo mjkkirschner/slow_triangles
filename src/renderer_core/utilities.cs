@@ -286,7 +286,7 @@ namespace renderer.utilities
                                {
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
                                    //TODO pass in fill color...
-                                   Color diffColor = Color.Teal;
+                                   Color diffColor = Color.Black;
                                    if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, ref diffColor))
                                    {
 
