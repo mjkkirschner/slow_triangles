@@ -6,6 +6,7 @@ using renderer.materials;
 using renderer.utilities;
 using renderer_core.dataStructures;
 using System.Linq;
+using System.Diagnostics;
 
 namespace renderer.shaders
 {
@@ -117,7 +118,7 @@ namespace renderer.shaders
 
         public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-
+            var specmat = mat as SpecularMaterial;
             void calcPhongLighting()
             {
 
@@ -153,39 +154,29 @@ namespace renderer.shaders
                 var Eye = (Vector3.Normalize(uniform_cam_world_pos - interpolatedV));  // we are in Eye Coordinates, so EyePos is (0,0,0).
                 var Reflect = (reflect(-L, interpolatedNormal));
 
-                //make up some terms
-                var lightIntensity = 1;
+                var KD = .1f;
 
                 //diffuse term
-                //var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
-                var diffColor = Color.FromArgb(204, 102, 0);
-                Color diffTerm = (diffColor.ToVector3() * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
+                var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
+                Color diffTerm = (KD * (diffColor.ToVector3() * KD * light.Color.ToVector3()) * (float)light.Intensity * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
                 var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
 
-                Vector3 ambientTerm = (new Vector3(uniform_ambient, uniform_ambient, uniform_ambient)) * diffColor.ToVector3();
 
-                //spec
-                var matShiny = 1024f;
-                var lightSpecColor = Color.White;
-                var materiLSpecColor = Color.White;
-                var KS = 1.0f;
 
                 var clampedSpecTerm = Vector3.Zero;
                 if (clampedDiffTerm.Length() > 0)
                 {
-                var specFactor = MathF.Pow(MathF.Max(Vector3.Dot(Eye, Reflect), 0.0f), matShiny);
-                var specTerm = light.Color.ToVector3() * specFactor;
-                Console.WriteLine(specTerm);
-                //clampedSpecTerm = reflectCol2.ToVector3();
-                //clampedSpecTerm = Vector3.Clamp(specTerm, Vector3.Zero, new Vector3(255, 255, 255));
-                clampedSpecTerm = Vector3.Clamp(specTerm, Vector3.Zero, new Vector3(255, 255, 255));
-                }
+                    var specFactor = MathF.Pow(MathF.Max(Vector3.Dot(Eye, Reflect), 0.0f), specmat.Shininess);
+                    var specTerm = light.Color.ToVector3() * (float)light.Intensity * specFactor * specmat.Ks;
+                    clampedSpecTerm = Vector3.Clamp(specTerm, Vector3.Zero, new Vector3(255, 255, 255));
 
-                color = (color.ToVector3() + ambientTerm + clampedDiffTerm + clampedSpecTerm).ToColor();
-                //color = (color.ToVector3() + clampedSpecTerm).ToColor();
+                }
+                color = (color.ToVector3() + clampedDiffTerm + clampedSpecTerm).ToColor();
 
             }
-
+            var diffColorOriginal = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
+            Vector3 ambientTerm = uniform_ambient * diffColorOriginal.ToVector3();
+            color = (color.ToVector3() + ambientTerm).ToColor();
 
             return true;
         }
@@ -244,6 +235,18 @@ namespace renderer.materials
     public class DiffuseMaterial : Material
     {
         public Texture2d DiffuseTexture;
+    }
+
+    public class SpecularMaterial : DiffuseMaterial
+    {
+        /// <summary>
+        /// power to raise specular light to. (higher is smaller highlight)
+        /// </summary>
+        public float Shininess;
+        /// <summary>
+        /// ratio of specular light to other light. lower is less bright specular light. 0 -1.0 is usual.
+        /// </summary>
+        public float Ks;
     }
 
     public class NormalMaterial : DiffuseMaterial
