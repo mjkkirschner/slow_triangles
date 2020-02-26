@@ -39,14 +39,14 @@ namespace renderer._3d
         {
             //cleanup from previous renders
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
-            for (var i = 0; i < previewBuffer.Length; i = i + 4)
+          /*  for (var i = 0; i < previewBuffer.Length; i = i + 4)
             {
                 previewBuffer[i] = fillColor.R;
                 previewBuffer[i + 1] = fillColor.G;
                 previewBuffer[i + 2] = fillColor.B;
                 previewBuffer[i + 3] = fillColor.A;
             }
-
+*/
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
 
             this.Scene.ToList().ForEach(group =>
@@ -60,7 +60,7 @@ namespace renderer._3d
                    foreach (var triFace in renderable.RenderableObject.Triangles)
                    {
                        //this slows down the render so we can see it.
-                       System.Threading.Thread.Sleep(3);
+                       //System.Threading.Thread.Sleep(3);
                        // Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
                        //transform verts to screenspace
                        var screenCoords = new List<Vector3>();
@@ -95,6 +95,15 @@ namespace renderer._3d
                    }
                })
                );
+
+               
+            for (var i = 0; i < ImageBuffer.Length; i = i + 1)
+            {
+                previewBuffer[i*4] = ImageBuffer[i].R;
+                previewBuffer[i*4 + 1] = ImageBuffer[i].G;
+                previewBuffer[i*4 + 2] = ImageBuffer[i].B;
+                previewBuffer[i*4 + 3] = ImageBuffer[i].A;
+            }
 
             return ImageBuffer.ToArray();
         }

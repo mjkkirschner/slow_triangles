@@ -279,11 +279,11 @@ namespace renderer.utilities
 
                                        imageBuffer[flatIndex] = diffColor;
                                        zbuffer[flatIndex] = z;
-                                       if (previewBuffer != null)
+                                       if (previewBuffer != null && false)
                                        {
-                                           var height = (int)(imageBuffer.Length/ imageBufferWidth);
-                                           var midheight = height/2;
-                                           var newY = y - midheight
+                                           //var height = (int)(imageBuffer.Length/ imageBufferWidth);
+                                           //var midheight = height/2;
+                                           //var newY = y - midheight
                                            var flatByteOffset = (imageBufferWidth * 4) * (int)y + (int)x*4;
                                            previewBuffer[flatByteOffset] = diffColor.R;
                                            previewBuffer[flatByteOffset + 1] = diffColor.G;

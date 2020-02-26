@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -36,7 +37,7 @@ namespace slow_triangles
 
             //just a test for now.
 
-           var cameraPos = new Vector3(0, 2, 2);
+            var cameraPos = new Vector3(0, 2, 2);
             var target = new Vector3(0, 0, 0);
             var width = 1024;
             var height = 1024;
@@ -64,14 +65,26 @@ namespace slow_triangles
 
             Task.Run(() =>
             {
-                renderer.Render();
+                var stopwatch = new Stopwatch();
+                var mat = Matrix4x4.CreateRotationY(0.174533f);
+                while (true)
+                {
+                    stopwatch.Start();
+
+                    var transformedLightDir = Vector3.Transform(renderable.material.Shader.LightDirection, Matrix4x4.Transpose(mat));
+                    renderable.material.Shader.LightDirection = transformedLightDir;
+                    renderer.Render();
+                    Console.WriteLine($"rendering took:{stopwatch.ElapsedMilliseconds}");
+                    stopwatch.Reset();
+                }
 
             });
             Task.Run(() =>
             {
-                while(true){
-                System.Threading.Thread.Sleep(1000);
-                update_tex(BufferPointer);
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    update_tex(BufferPointer);
                 }
             });
 
