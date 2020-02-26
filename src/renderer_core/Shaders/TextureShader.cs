@@ -14,7 +14,7 @@ namespace renderer.shaders
     /// <summary>
     /// Normal shader which supports diffuse and normal maps, 
     /// </summary>
-    public class Lit_NormalShader : Lit_TextureShader
+    public class Lit_NormalShader : Lit_SpecularTextureShader
     {
         //these uniform fields are used for normal transformation
         protected Matrix4x4 modelViewProjection;
@@ -91,7 +91,7 @@ namespace renderer.shaders
 
     }
 
-    public class Lit_TextureShader : Unlit_TextureShader
+    public class Lit_SpecularTextureShader : Unlit_TextureShader
     {
         //holds all lights that light this geometry.
         public ILight[] uniform_light_array;
@@ -154,11 +154,9 @@ namespace renderer.shaders
                 var Eye = (Vector3.Normalize(uniform_cam_world_pos - interpolatedV));  // we are in Eye Coordinates, so EyePos is (0,0,0).
                 var Reflect = (reflect(-L, interpolatedNormal));
 
-                var KD = .1f;
-
                 //diffuse term
                 var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
-                Color diffTerm = (KD * (diffColor.ToVector3() * KD * light.Color.ToVector3()) * (float)light.Intensity * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
+                Color diffTerm = (specmat.Kd * (diffColor.ToVector3() * specmat.Kd * light.Color.ToVector3()) * (float)light.Intensity * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
                 var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
 
 
@@ -181,7 +179,7 @@ namespace renderer.shaders
             return true;
         }
 
-        public Lit_TextureShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
+        public Lit_SpecularTextureShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
            : base(viewMatrix, projectionMatrix, viewPort)
         {
             varying_normal = new Vector3[3];
@@ -247,6 +245,10 @@ namespace renderer.materials
         /// ratio of specular light to other light. lower is less bright specular light. 0 -1.0 is usual.
         /// </summary>
         public float Ks;
+        /// <summary>
+        /// ratio of diffuse light.
+        /// </summary>
+        public float Kd;
     }
 
     public class NormalMaterial : DiffuseMaterial

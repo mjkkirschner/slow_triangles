@@ -107,7 +107,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_TextureShader(view, proj, viewport)
+                    Shader = new Lit_SpecularTextureShader(view, proj, viewport)
                     {
                         uniform_ambient = .5f,
                         uniform_light_array = new ILight[]
