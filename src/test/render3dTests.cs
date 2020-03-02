@@ -154,16 +154,6 @@ namespace Tests
                         uniform_light_array = new ILight[]
                             { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
                     },
-
-=======
-            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/tiny_renderer_sample_models/african_head.obj"));
-            var diffuseTex = PNGImage.LoadPNGFromPath("../../../../../geometry_models/tiny_renderer_sample_models/african_head_diffuse2.png");
-
-            var renderable = new Renderable<Mesh>(
-                new DiffuseMaterial()
-                {
-                    Shader = new TextureShader(view, proj, viewport) { LightDirection = new Vector3(1, -1, 1) },
->>>>>>> morezbrushrenders
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
                 mesh);
