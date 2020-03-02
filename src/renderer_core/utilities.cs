@@ -261,20 +261,22 @@ namespace renderer.utilities
                        Enumerable.Range((int)miny, (int)(maxy - miny) + 2).ToList().ForEach(y =>
                        {
                            var IsInsideTriangle = pixelIsInsideTriangle(x, y, screenCords);
-                           var bary = TriangleExtensions.BaryCoordinates2(x, y,
-                               A.ToVector2(), B.ToVector2(), C.ToVector2());
-                           //compute the depth of current pixel.
-                           var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
+
                            if (IsInsideTriangle)
                            {
+                               var bary = TriangleExtensions.BaryCoordinates(x, y,
+                             A.ToVector2(), B.ToVector2(), C.ToVector2());
+                               //compute the depth of current pixel.
+                               var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
                                var flatIndex = imageBufferWidth * (int)y + (int)x;
                                //don't draw unless we are within bounds
                                //don't draw if something is already in the depth buffer for this pixel.
                                if (flatIndex < imageBuffer.Length && flatIndex > -1 /*&& z < depthBuffer[flatIndex]*/)
                                {
+
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
                                    Color diffColor;
-                                   if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, ref diffColor))
+                                   if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, triIndex, ref diffColor))
                                    {
 
                                        imageBuffer[flatIndex] = diffColor;
@@ -284,13 +286,14 @@ namespace renderer.utilities
                                            //var height = (int)(imageBuffer.Length/ imageBufferWidth);
                                            //var midheight = height/2;
                                            //var newY = y - midheight
-                                           var flatByteOffset = (imageBufferWidth * 4) * (int)y + (int)x*4;
+                                           var flatByteOffset = (imageBufferWidth * 4) * (int)y + (int)x * 4;
                                            previewBuffer[flatByteOffset] = diffColor.R;
                                            previewBuffer[flatByteOffset + 1] = diffColor.G;
                                            previewBuffer[flatByteOffset + 2] = diffColor.B;
                                            previewBuffer[flatByteOffset + 3] = diffColor.A;
                                        }
                                    }
+
                                }
                            }
                        });

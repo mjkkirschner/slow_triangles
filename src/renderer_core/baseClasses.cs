@@ -150,7 +150,7 @@ namespace renderer.dataStructures
     public class Shader
     {
         public Vector3 LightDirection = new Vector3(0, -1, 0);
-        protected float[] varying_intensity = new float[3];
+        protected float[,] varying_intensity = new float[60000,3];
         public virtual Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];
@@ -158,16 +158,25 @@ namespace renderer.dataStructures
             var currentNormal = mesh.VertexNormalData[mesh.Triangles[triangleIndex].NormalIndexList[vertIndex] - 1];
 
             //dot normal*light = intensity for vert.
-            varying_intensity[vertIndex] = System.Math.Max(0, Vector3.Dot(currentNormal, LightDirection));
+            //TODO to make this work with multiple threads, each triangle needs its own copy of this variable.
+            varying_intensity[triangleIndex,vertIndex] = System.Math.Max(0, Vector3.Dot(currentNormal, LightDirection));
 
             //we don't do any projection in this shader
             return new Vector3(currentVert.X, currentVert.Y, currentVert.Z);
         }
 
-
-        public virtual bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+          public virtual bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-            var varying_vector = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
+            var varying_vector = new Vector3(varying_intensity[0,0], varying_intensity[0,1], varying_intensity[0,2]);
+            var intensity = Vector3.Dot(varying_vector, baryCoords);
+            var channel = System.Math.Min(255, (int)(255 * intensity));
+            color = Color.FromArgb(channel, channel, channel);
+            return true;
+        }
+
+        public virtual bool FragmentToRaster(Material mat, Vector3 baryCoords, int triIndex, ref Color color)
+        {
+            var varying_vector = new Vector3(varying_intensity[triIndex,0], varying_intensity[triIndex,1], varying_intensity[triIndex,2]);
             var intensity = Vector3.Dot(varying_vector, baryCoords);
             var channel = System.Math.Min(255, (int)(255 * intensity));
             color = Color.FromArgb(channel, channel, channel);

@@ -35,7 +35,7 @@ namespace slow_triangles
             Console.WriteLine("Starting Renderer");
             //lets start up a render
 
-            //just a test for now.
+            //just a test for now displaying an animation
 
             var cameraPos = new Vector3(0, 2, 2);
             var target = new Vector3(0, 0, 0);
@@ -50,11 +50,10 @@ namespace slow_triangles
             var normalMap = PNGImage.LoadPNGFromPath("../../textures/testMaps/gridnormalmap.png");
 
             var renderable = new Renderable<Mesh>(
-                new NormalMaterial()
+                new DiffuseMaterial()
                 {
-                    Shader = new NormalShader(view, proj, viewport) { ambientCoef = 10, LightDirection = new Vector3(0, 0, 1) },
+                    Shader = new Base3dShader(view, proj, viewport) { LightDirection = new Vector3(0, 0, 1) },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
-                    NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
                 },
                 mesh);
             var renderer = new Renderer3dGeneric<Mesh>(width, height, Color.White,
@@ -71,7 +70,7 @@ namespace slow_triangles
                 {
                     stopwatch.Start();
 
-                    var transformedLightDir = Vector3.Transform(renderable.material.Shader.LightDirection, Matrix4x4.Transpose(mat));
+                   var transformedLightDir = Vector3.Transform(renderable.material.Shader.LightDirection, Matrix4x4.Transpose(mat));
                     renderable.material.Shader.LightDirection = transformedLightDir;
                     renderer.Render();
                     Console.WriteLine($"rendering took:{stopwatch.ElapsedMilliseconds}");

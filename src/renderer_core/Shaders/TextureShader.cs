@@ -57,7 +57,7 @@ namespace renderer.shaders
 
         public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-            var varying_vector_int = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
+            var varying_vector_int = new Vector3(varying_intensity[0,0], varying_intensity[0,1], varying_intensity[0,2]);
 
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
@@ -102,14 +102,14 @@ namespace renderer.shaders
 
 
             //dot normal*light = intensity for vert.
-            varying_intensity[vertIndex] = System.Math.Max(0, Vector3.Dot(currentNormal, LightDirection));
+            varying_intensity[0,vertIndex] = System.Math.Max(0, Vector3.Dot(currentNormal, LightDirection));
 
             return base.VertexToFragment(mesh, triangleIndex, vertIndex);
         }
 
         public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-            var varying_vector_int = new Vector3(varying_intensity[0], varying_intensity[1], varying_intensity[2]);
+            var varying_vector_int = new Vector3(varying_intensity[0,0], varying_intensity[0,1], varying_intensity[0,2]);
             var intensity = Math.Min(1, Math.Max(0, Vector3.Dot(varying_vector_int, baryCoords)));
 
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
