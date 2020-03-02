@@ -187,7 +187,6 @@ namespace renderer.shaders
         }
     }
 
-
     /// <summary>
     /// Shader displays an unlit texture - only ambient light intensity can be modified to light the scene.
     /// </summary>
@@ -203,12 +202,12 @@ namespace renderer.shaders
             var currentUV = mesh.VertexUVData[mesh.Triangles[triangleIndex].UVIndexList[vertIndex] - 1];
             varying_UVCoord[vertIndex] = currentUV;
 
+
             return base.VertexToFragment(mesh, triangleIndex, vertIndex);
         }
 
         public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
         {
-
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
 
@@ -218,7 +217,6 @@ namespace renderer.shaders
             color = Color.FromArgb((int)(uniform_ambient + diffColor.R), (int)(uniform_ambient + diffColor.G), (int)(uniform_ambient + diffColor.B));
             return true;
         }
-
         public Unlit_TextureShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
            : base(viewMatrix, projectionMatrix, viewPort)
         {
@@ -234,7 +232,6 @@ namespace renderer.materials
     {
         public Texture2d DiffuseTexture;
     }
-
     public class SpecularMaterial : DiffuseMaterial
     {
         /// <summary>
@@ -250,7 +247,6 @@ namespace renderer.materials
         /// </summary>
         public float Kd;
     }
-
     public class NormalMaterial : DiffuseMaterial
     {
         public Texture2d NormalMap;

@@ -21,7 +21,6 @@ namespace renderer._3d
 
         private Color fillColor = Color.Black;
 
-
         public Renderer3dGeneric(int width, int height, Color fillColor, IEnumerable<IEnumerable<Renderable<T>>> renderData)
         {
             this.Width = width;
