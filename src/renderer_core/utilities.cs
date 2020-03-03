@@ -51,7 +51,15 @@ namespace renderer.utilities
         /// <returns></returns>
         public static Vector3 ToVector3(this Color color)
         {
-            return new Vector3((color.R),  (color.G), (color.B) );
+            return new Vector3((color.R), (color.G), (color.B));
+        }
+
+        public static bool ColorEqual(this Color color, Color other)
+        {
+            return color.A == other.A &&
+            color.R == other.R &&
+            color.G == other.G &&
+            color.B == other.B;
         }
     }
 
@@ -70,7 +78,7 @@ namespace renderer.utilities
         public static Color ToColor(this Vector3 vec)
         {
             //clamp these values
-            return Color.FromArgb(Math.Clamp((int)vec.X,0,255), Math.Clamp((int)vec.Y,0,255), Math.Clamp((int)vec.Z,0,255));
+            return Color.FromArgb(Math.Clamp((int)vec.X, 0, 255), Math.Clamp((int)vec.Y, 0, 255), Math.Clamp((int)vec.Z, 0, 255));
         }
 
         public static Vector2 ToVector2(this Vector3 vec)

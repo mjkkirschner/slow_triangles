@@ -12,6 +12,8 @@ using renderer.materials;
 using renderer.shaders;
 using System.IO;
 using renderer_core.dataStructures;
+using renderer.tests;
+using System;
 
 namespace Tests
 {
@@ -72,7 +74,7 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new Unlit_TextureShader(view, proj, viewport),
+                    Shader = new Unlit_TextureShader(view, proj, viewport) { uniform_ambient = .8f },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors)
                 },
                 mesh);
@@ -106,11 +108,10 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_SpecularTextureShader(view, proj, viewport)
+                    Shader = new Single_DirLight_NormalShader(view, proj, viewport)
                     {
                         uniform_ambient = .5f,
-                        uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
+                        uniform_dir_light= new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
@@ -121,6 +122,7 @@ namespace Tests
 
             var image = new ppmImage(width, height, 255);
             image.Colors = renderer.Render();
+            image.Flip();
             System.IO.File.WriteAllBytes("../../../perspectiveTestNormal.ppm", image.toByteArray());
             Assert.AreEqual(1002520, image.Colors.Where(x => x == Color.White).Count());
 
@@ -148,11 +150,9 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport)
+                    Shader = new Unlit_TextureShader(view, proj, viewport)
                     {
                         uniform_ambient = 10,
-                        uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
@@ -162,6 +162,7 @@ namespace Tests
 
             var image = new ppmImage(width, height, 255);
             image.Colors = renderer.Render();
+            image.Flip();
             System.IO.File.WriteAllBytes("../../../perspectiveTestTexHead.ppm", image.toByteArray());
             Assert.AreEqual(3856227, image.Colors.Where(x => x == Color.White).Count());
 
@@ -190,11 +191,10 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport)
+                    Shader = new Single_DirLight_NormalShader(view, proj, viewport)
                     {
-                        uniform_ambient = 10,
-                        uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
+                        uniform_ambient = 1.5f,
+                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
                     },
 
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
@@ -206,6 +206,7 @@ namespace Tests
 
             var image = new ppmImage(width, height, 255);
             image.Colors = renderer.Render();
+            image.Flip();
             System.IO.File.WriteAllBytes("../../../perspectiveTestNormalHead.ppm", image.toByteArray());
             Assert.AreEqual(3362439, image.Colors.Where(x => x == Color.White).Count());
 
@@ -227,15 +228,14 @@ namespace Tests
             var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo(System.IO.Path.Combine(root, "geometry_models/head_asymmetric/head.OBJ")));
             var diffuseTex = PNGImage.LoadPNGFromPath(System.IO.Path.Combine(root, "geometry_models/head_asymmetric/head.png"));
 
+            //load previous image.
+
+            var referenceImage = new ppmImage("../../../asymmetricHead.ppm");
+
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport)
-                    {
-                        uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
-                    },
-
+                    Shader = new Unlit_TextureShader(view, proj, viewport),
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
                 mesh);
@@ -247,6 +247,13 @@ namespace Tests
             image.Flip();
             System.IO.File.WriteAllBytes("../../../asymmetricHead.ppm", image.toByteArray());
             Assert.AreEqual(3528584, image.Colors.Where(x => x == Color.White).Count());
+
+            //compare all colors by channels with each color from the ref image in same order.
+            Assert.AreEqual(0, referenceImage.Colors.Where((x, i) =>
+             {
+                 return !x.ColorEqual(image.Colors[i]);
+             }).Count());
+
         }
 
     }

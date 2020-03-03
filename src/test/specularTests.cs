@@ -66,6 +66,53 @@ namespace Tests
 
         }
 
+        [Test]
+        public void specular_Knot()
+        {
+            var cameraPos = new Vector3(0, 0, 6);
+            var target = new Vector3(0, 0, 0);
+            var width = 1024;
+            var height = 1024;
+            var view = Matrix4x4.CreateLookAt(cameraPos, target, Vector3.UnitY);
+            var proj = Matrix4x4.CreatePerspective(1, 1, 1, 10);
+            var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, width, height);
+
+            var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo(Path.Combine(root, "geometry_models/knot3/knot3.obj")));
+            var diffuseTex = new ppmImage("../../../../../textures/testTexture2.ppm");
+
+
+            var renderable = new Renderable<Mesh>(
+                new SpecularMaterial()
+                {
+                    Ks = 1f,
+                    Kd = .1f,
+                    Shininess = 200,
+                    Shader = new Lit_SpecularTextureShader(view, proj, viewport)
+                    {
+                        uniform_ambient = .1f,
+                        uniform_light_array = new ILight[]
+                            { new DirectionalLight(new Vector3(0, 1, 0), false, Color.White, .1f),
+                             new DirectionalLight(Vector3.Normalize(new Vector3(0,0,1)), false, Color.Violet, .7f)
+                              }
+                    },
+                    DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
+                },
+                mesh);
+            var renderer = new Renderer3dGeneric<Mesh>(width, height, Color.White,
+                new List<IEnumerable<Renderable<Mesh>>> { new List<Renderable<Mesh>> { renderable } });
+
+            (renderable.material.Shader as Lit_SpecularTextureShader).uniform_cam_world_pos = cameraPos;
+            var image = new ppmImage(width, height, 255);
+            image.Colors = renderer.Render();
+            image.Flip();
+
+            var path = $"../../../specular/knot3.ppm";
+            System.IO.FileInfo file = new System.IO.FileInfo(path);
+            file.Directory.Create();
+            System.IO.File.WriteAllBytes(path, image.toByteArray());
+
+        }
+
         //note - model in this test is taken directly from:
         //https://github.com/ssloy/tinyrenderer/tree/master/obj/african_head
         //to compare the output to sample rendering.

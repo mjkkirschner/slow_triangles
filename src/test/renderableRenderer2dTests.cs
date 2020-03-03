@@ -71,13 +71,8 @@ namespace Tests
 
             System.IO.File.WriteAllBytes("../../../ShaderRender2.ppm", image.toByteArray());
              //how many pixels are bluish...
-            Assert.AreEqual(4053, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+            Assert.AreEqual(1755, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(31, 159, 254)) < 5).Count());
 
         }
-
-
-
-
-
     }
 }

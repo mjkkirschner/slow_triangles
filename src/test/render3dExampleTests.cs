@@ -11,6 +11,7 @@ using renderer.shaders;
 using renderer.utilities;
 using System.Linq;
 using renderer_core.dataStructures;
+using renderer.tests;
 
 namespace Tests
 {
@@ -42,9 +43,11 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, 
-                     uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
+                    Shader = new Single_DirLight_NormalShader(view, proj, viewport)
+                    {
+                        uniform_ambient = 1.5f,
+                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
+                        uniform_debug_normal = true,
                     },
 
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
@@ -82,9 +85,10 @@ namespace Tests
             var renderable = new Renderable<Mesh>(
                 new NormalMaterial()
                 {
-                    Shader = new Lit_NormalShader(view, proj, viewport) { uniform_ambient = 10, 
-                      uniform_light_array = new ILight[]
-                            { new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red) },
+                    Shader = new Single_DirLight_NormalShader(view, proj, viewport)
+                    {
+                        uniform_ambient = 1.0f,
+                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
                     },
 
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
@@ -99,6 +103,7 @@ namespace Tests
             image.Flip();
             System.IO.File.WriteAllBytes("../../../perspectiveTestNormalMandoonecolorfront.ppm", image.toByteArray());
             Assert.AreEqual(3248415, image.Colors.Where(x => x == Color.White).Count());
+            Assert.AreEqual(3895, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
 
         }
     }
