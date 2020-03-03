@@ -111,7 +111,7 @@ namespace Tests
                     Shader = new Single_DirLight_NormalShader(view, proj, viewport)
                     {
                         uniform_ambient = .5f,
-                        uniform_dir_light= new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
+                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red),
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)
@@ -152,7 +152,7 @@ namespace Tests
                 {
                     Shader = new Unlit_TextureShader(view, proj, viewport)
                     {
-                        uniform_ambient = 10,
+                        uniform_ambient = 1,
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                 },
@@ -166,6 +166,13 @@ namespace Tests
             System.IO.File.WriteAllBytes("../../../perspectiveTestTexHead.ppm", image.toByteArray());
             Assert.AreEqual(3856227, image.Colors.Where(x => x == Color.White).Count());
 
+            //expect an average color for all colors which are not white.
+            var averageColor = image.Colors.Where(col=>!col.ColorEqual(Color.White)).Aggregate((c, c2) =>
+            {
+                return Color.FromArgb((c.R + c2.R) / 2, (c.G + c2.G) / 2, (c.B + c2.B) / 2);
+            });
+
+            Assert.IsTrue(Color.FromArgb(82, 62, 51).ColorEqual(averageColor));
 
         }
 
