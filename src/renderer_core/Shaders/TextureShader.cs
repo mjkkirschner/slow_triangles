@@ -81,11 +81,8 @@ namespace renderer.shaders
 
             var intensity = Math.Min(1.0, Math.Max(0.0, Vector3.Dot(normalFromTex, interpolatedLightVector)));
 
-            //ambient acts as minimum brightness.
-            color = Color.FromArgb(
-                 Math.Clamp((int)Math.Min(diffColor.R * intensity * uniform_ambient, 255), 0, 255),
-                 Math.Clamp((int)Math.Min(diffColor.G * intensity * uniform_ambient, 255), 0, 255),
-                 Math.Clamp((int)Math.Min(diffColor.B * intensity * uniform_ambient, 255), 0, 255));
+            var light = uniform_dir_light;
+            color = calcSingleDirLight_noSpec(mat, interpolatedUV, diffColor, intensity, light, uniform_ambient);
 
             //debugging...
             if (uniform_debug_normal)
@@ -99,8 +96,6 @@ namespace renderer.shaders
 
             return true;
         }
-
-
     }
 
     public class Lit_SpecularTextureShader : Unlit_TextureShader
@@ -167,8 +162,6 @@ namespace renderer.shaders
                 var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
                 Color diffTerm = (specmat.Kd * (diffColor.ToVector3() * specmat.Kd * light.Color.ToVector3()) * (float)light.Intensity * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
                 var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
-
-
 
                 var clampedSpecTerm = Vector3.Zero;
                 if (clampedDiffTerm.Length() > 0)
@@ -265,8 +258,9 @@ namespace renderer.shaders
 
 
             var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
-            var colorvec = new Vector3((int)(uniform_ambient * diffColor.R * intensity), (int)(uniform_ambient * diffColor.G * intensity), (int)(uniform_ambient * diffColor.B * intensity));
-            color = Vector3.Clamp(colorvec, Vector3.Zero, new Vector3(255, 255, 255)).ToColor();
+            var light = uniform_dir_light;
+            color = calcSingleDirLight_noSpec(mat, interpolatedUV, diffColor, intensity, light, uniform_ambient);
+
             return true;
         }
     }

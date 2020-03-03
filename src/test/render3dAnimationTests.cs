@@ -48,7 +48,7 @@ namespace Tests
                     Shader = new Single_DirLight_NormalShader(view, proj, viewport)
                     {
                         uniform_ambient = 1f,
-                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.White)
+                        uniform_dir_light = new DirectionalLight(new Vector3(0, 0, 1), false, Color.Red, 1f)
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors),
                     NormalMap = new Texture2d(normalMap.Width, normalMap.Height, normalMap.Colors)

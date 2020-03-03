@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Linq;
 using renderer.utilities;
 using System;
+using renderer_core.dataStructures;
+using renderer.materials;
 
 namespace renderer.dataStructures
 {
@@ -107,7 +109,7 @@ namespace renderer.dataStructures
 
         public Color GetColorAtUV(Vector2 UV)
         {
-            var x =  UV.X * Width;
+            var x = UV.X * Width;
             var y = (1.0f - UV.Y) * Height;
 
             return ColorData[Width * (int)y + (int)x];
@@ -142,6 +144,19 @@ namespace renderer.dataStructures
             var mvp = Matrix4x4.Transpose(Matrix4x4.Multiply(ViewModelMatrix, ProjectionMatrix));
             var final = Matrix4x4.Multiply(ViewportMatrix, mvp);
             return vert.ApplyMatrix(final);
+        }
+
+        //TODO consider moving to shader utilities.
+        protected Color calcSingleDirLight_noSpec(Material mat, Vector2 interpolatedUV, Color diffColor, double intensity, DirectionalLight light, float uniform_ambient)
+        {
+            var diffTerm = ((diffColor.ToVector3() * light.Color.ToVector3() / 255.0f) * (float)(light.Intensity * intensity)).ToColor();
+            var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
+
+            var colIntermediate = clampedDiffTerm.ToColor();
+
+            var diffColorOriginal = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
+            Vector3 ambientTerm = uniform_ambient * diffColorOriginal.ToVector3();
+            return (colIntermediate.ToVector3() + ambientTerm).ToColor();
         }
 
 

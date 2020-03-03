@@ -103,7 +103,8 @@ namespace Tests
             image.Flip();
             System.IO.File.WriteAllBytes("../../../perspectiveTestNormalMandoonecolorfront.ppm", image.toByteArray());
             Assert.AreEqual(3248415, image.Colors.Where(x => x == Color.White).Count());
-            Assert.AreEqual(3895, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(41, 92, 144)) < 50).Count());
+            //bluish pixels
+            Assert.AreEqual(24984, image.Colors.Where(x => Utilities.ComputeSimpleColorDistance(x, Color.FromArgb(73, 85, 121)) < 20).Count());
 
         }
     }
