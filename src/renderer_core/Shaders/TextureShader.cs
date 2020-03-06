@@ -60,7 +60,7 @@ namespace renderer.shaders
             return base.VertexToFragment(mesh, triangleIndex, vertIndex);
         }
 
-        public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+        public override bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
         {
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
@@ -88,9 +88,9 @@ namespace renderer.shaders
             if (uniform_debug_normal)
             {
                 color = Color.FromArgb(
-                       Math.Clamp((int)(normalFromTex.X * 255f), 0, 255),
-                  Math.Clamp((int)(normalFromTex.Y * 255f), 0, 255),
-                  Math.Clamp((int)(normalFromTex.Z * 255f), 0, 255));
+                       MathExtensions.Clamp((int)(normalFromTex.X * 255f), 0, 255),
+                  MathExtensions.Clamp((int)(normalFromTex.Y * 255f), 0, 255),
+                  MathExtensions.Clamp((int)(normalFromTex.Z * 255f), 0, 255));
 
             }
 
@@ -120,7 +120,7 @@ namespace renderer.shaders
             return resultVert;
         }
 
-        public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+        public override bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
         {
             var specmat = mat as SpecularMaterial;
             void calcPhongLighting()
@@ -160,13 +160,13 @@ namespace renderer.shaders
 
                 //diffuse term
                 var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
-                Color diffTerm = (specmat.Kd * (diffColor.ToVector3() * specmat.Kd * light.Color.ToVector3()) * (float)light.Intensity * MathF.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
+                Color diffTerm = (specmat.Kd * (diffColor.ToVector3() * specmat.Kd * light.Color.ToVector3()) * (float)light.Intensity * Math.Max(Vector3.Dot(interpolatedNormal, L), 0.0f)).ToColor();
                 var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
 
                 var clampedSpecTerm = Vector3.Zero;
                 if (clampedDiffTerm.Length() > 0)
                 {
-                    var specFactor = MathF.Pow(MathF.Max(Vector3.Dot(Eye, Reflect), 0.0f), specmat.Shininess);
+                    var specFactor = (float)(Math.Pow(Math.Max(Vector3.Dot(Eye, Reflect), 0.0f), specmat.Shininess));
                     var specTerm = light.Color.ToVector3() * (float)light.Intensity * specFactor * specmat.Ks;
                     clampedSpecTerm = Vector3.Clamp(specTerm, Vector3.Zero, new Vector3(255, 255, 255));
 
@@ -212,7 +212,7 @@ namespace renderer.shaders
             return base.VertexToFragment(mesh, triangleIndex, vertIndex);
         }
 
-        public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+        public override bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
         {
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
@@ -242,7 +242,7 @@ namespace renderer.shaders
 
         }
 
-        public override bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+        public override bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
         {
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
@@ -266,12 +266,17 @@ namespace renderer.shaders
     }
 }
 
+
+   
+
+
 namespace renderer.materials
 {
     public class DiffuseMaterial : Material
     {
         public Texture2d DiffuseTexture;
     }
+
     public class SpecularMaterial : DiffuseMaterial
     {
         /// <summary>

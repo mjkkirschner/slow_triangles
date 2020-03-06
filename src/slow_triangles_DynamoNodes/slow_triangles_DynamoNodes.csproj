@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DynamoVisualProgramming.Core" Version="2.6.0-beta7806" />
+    <PackageReference Include="DynamoVisualProgramming.DynamoCoreNodes" Version="2.6.0-beta7806" />
+    <PackageReference Include="DynamoVisualProgramming.ZeroTouchLibrary" Version="2.6.0-beta7806" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\renderer_core\renderer_core.csproj" />
+  </ItemGroup>
+
+</Project>
