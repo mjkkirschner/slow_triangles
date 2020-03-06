@@ -13,10 +13,10 @@ jobs:
         uses: vrnobody/Setup-DotNetFrameworkEnv@v1
 
       - name: Restore Nuget packages
-        run: nuget restore MyProject.sln
+        run: nuget restore src/slow_triangles.sln
 
       - name: Build solution
-        run: msbuild src/slowTriangles.sln -p:Configuration=Release
+        run: msbuild src/slow_triangles.sln -p:Configuration=Release
 
       - name: Run unit tests
         run: |
