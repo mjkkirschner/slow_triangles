@@ -109,10 +109,13 @@ namespace renderer.dataStructures
 
         public Color GetColorAtUV(Vector2 UV)
         {
+            //clamp values at 0 and 1.
+            UV = Vector2.Clamp(UV, Vector2.Zero, Vector2.One);
+
             var x = UV.X * Width;
             var y = (1.0f - UV.Y) * Height;
-
-            return ColorData[Width * (int)y + (int)x];
+            var index = MathExtensions.Clamp<int>(Width * (int)y + (int)x, 0, (Width * Height)-1);
+            return ColorData[index];
         }
 
         public Texture2d(int width, int height, IEnumerable<Color> colorData)
@@ -138,6 +141,13 @@ namespace renderer.dataStructures
             this.ViewportMatrix = viewPort;
         }
 
+        public void SetProjectionMatrices(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
+        {
+            this.ViewModelMatrix = viewMatrix;
+            this.ProjectionMatrix = projectionMatrix;
+            this.ViewportMatrix = viewPort;
+        }
+
         public override Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var vert = base.VertexToFragment(mesh, triangleIndex, vertIndex);
@@ -147,7 +157,7 @@ namespace renderer.dataStructures
         }
 
         //TODO consider moving to shader utilities.
-        protected Color calcSingleDirLight_noSpec(Material mat, Vector2 interpolatedUV, Color diffColor, double intensity, DirectionalLight light, float uniform_ambient)
+        protected Color calcSingleDirLight_noSpec(IMaterial mat, Vector2 interpolatedUV, Color diffColor, double intensity, DirectionalLight light, float uniform_ambient)
         {
             var diffTerm = ((diffColor.ToVector3() * light.Color.ToVector3() / 255.0f) * (float)(light.Intensity * intensity)).ToColor();
             var clampedDiffTerm = Vector3.Clamp(diffTerm.ToVector3(), Vector3.Zero, new Vector3(255, 255, 255));
@@ -159,7 +169,6 @@ namespace renderer.dataStructures
             return (colIntermediate.ToVector3() + ambientTerm).ToColor();
         }
 
-
     }
 
     //TODO this type likely to be replaced after implementing materials/shaders / materialMeshes.
@@ -170,8 +179,7 @@ namespace renderer.dataStructures
     /// </summary>
     public class Shader
     {
-
-
+       
         public virtual Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];
@@ -184,7 +192,7 @@ namespace renderer.dataStructures
         }
 
 
-        public virtual bool FragmentToRaster(Material mat, Vector3 baryCoords, ref Color color)
+        public virtual bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
         {
             var intensity = 1.0;
             var channel = System.Math.Min(255, (int)(255 * intensity));
@@ -195,11 +203,15 @@ namespace renderer.dataStructures
 
     //TODO currently, has no use, will be used to set specific maps and parameters for a specified shader.
     //potentially can use reflection or description objects.
-    public class Material
+    public class Material:IMaterial
     {
         public Shader Shader { get; set; }
     }
 
+    public interface IMaterial
+    {
+        Shader Shader { get; set; }
+    }
 
     /// <summary>
     /// A bag for data and materials which specify how to render that data.
@@ -208,8 +220,8 @@ namespace renderer.dataStructures
     public class Renderable<T> where T : Mesh
     {
         public T RenderableObject { get; set; }
-        public Material material { get; set; }
-        public Renderable(Material material, T data)
+        public IMaterial material { get; set; }
+        public Renderable(IMaterial material, T data)
         {
             this.RenderableObject = data;
             this.material = material;

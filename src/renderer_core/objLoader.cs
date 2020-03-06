@@ -173,7 +173,8 @@ namespace renderer.core
             return tempMesh;
         }
 
-        private static void calculateAndSetNormalForTri(ref TriangleFace triangleFace, Mesh mesh)
+        //TODO this should be moved to the mesh class and should be invoked as part of constructor...
+        public static void calculateAndSetNormalForTri(ref TriangleFace triangleFace, Mesh mesh)
         {
             //if the normal list is empty for this mesh or null - set it to be the same size
             //as the list of verts. we'll generate on normal per vert.
@@ -202,7 +203,8 @@ namespace renderer.core
 
         }
 
-        private static (Vector3, Vector3) calculateTangetSpaceForTri(TriangleFace triangleFace, Mesh mesh)
+        //TODO this should be moved to the mesh class and should be invoked as part of constructor...
+        public static (Vector3, Vector3) calculateTangetSpaceForTri(TriangleFace triangleFace, Mesh mesh)
         {
             var triVerts = triangleFace.vertIndexList.Select(ind => mesh.VertexData[ind - 1].ToVector3()).ToArray();
             var uvs = triangleFace.UVIndexList.Select(ind => mesh.VertexUVData[ind - 1]).ToArray();

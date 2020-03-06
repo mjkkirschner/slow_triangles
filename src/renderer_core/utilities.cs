@@ -1,11 +1,10 @@
+using renderer.dataStructures;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using renderer.dataStructures;
-using renderer.interfaces;
 
 namespace renderer.utilities
 {
@@ -78,7 +77,7 @@ namespace renderer.utilities
         public static Color ToColor(this Vector3 vec)
         {
             //clamp these values
-            return Color.FromArgb(Math.Clamp((int)vec.X, 0, 255), Math.Clamp((int)vec.Y, 0, 255), Math.Clamp((int)vec.Z, 0, 255));
+            return Color.FromArgb(MathExtensions.Clamp((int)vec.X, 0, 255), MathExtensions.Clamp((int)vec.Y, 0, 255), MathExtensions.Clamp((int)vec.Z, 0, 255));
         }
 
         public static Vector2 ToVector2(this Vector3 vec)
@@ -263,7 +262,7 @@ namespace renderer.utilities
 
 
         //TODO should probably be Vector4
-        public static void drawTriangle(int triIndex, Vector3[] screenCords, Material material, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
+        public static void drawTriangle(int triIndex, Vector3[] screenCords, IMaterial material, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
         {
             var minx = screenCords.Select(x => x.X).Min();
             var miny = screenCords.Select(x => x.Y).Min();
@@ -307,5 +306,15 @@ namespace renderer.utilities
                    });
         }
 
+    }
+
+    public static class MathExtensions
+    {
+        public static T Clamp<T>(T val, T min, T max) where T : IComparable<T>
+        {
+            if (val.CompareTo(min) < 0) return min;
+            else if (val.CompareTo(max) > 0) return max;
+            else return val;
+        }
     }
 }
