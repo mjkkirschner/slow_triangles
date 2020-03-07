@@ -14,12 +14,15 @@ namespace renderer_core.dataStructures
         public Color Color { get; set; }
         public double Intensity { get; set; }
 
+        public Matrix4x4 ShadowProjectionMatrix { get; set; }
+
         public Light(bool castShadow, Vector3 pos, Color color, Double intensity = 1.0)
         {
             CastShadow = castShadow;
             Position = pos;
             Color = color;
             Intensity = intensity;
+            ShadowProjectionMatrix = Matrix4x4.Identity;
         }
     }
 
@@ -37,6 +40,8 @@ namespace renderer_core.dataStructures
         public DirectionalLight(Vector3 direction, bool castShadow, Color color, Double intensity = 1.0) : base(castShadow, Vector3.Zero, color, intensity)
         {
             this.Direction = direction;
+            //TODO this is just random.
+            ShadowProjectionMatrix = Matrix4x4.CreateOrthographic(1, 1, 1, 10);
         }
     }
 
@@ -46,6 +51,8 @@ namespace renderer_core.dataStructures
         Vector3 Position { get; set; }
         Color Color { get; set; }
         Double Intensity { get; set; }
+        
+        Matrix4x4 ShadowProjectionMatrix { get; }
     }
 
 }
