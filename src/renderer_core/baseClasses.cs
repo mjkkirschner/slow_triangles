@@ -7,6 +7,7 @@ using renderer.utilities;
 using System;
 using renderer_core.dataStructures;
 using renderer.materials;
+using System.Collections;
 
 namespace renderer.dataStructures
 {
@@ -123,6 +124,11 @@ namespace renderer.dataStructures
             this.Width = width;
             this.Height = height;
             this.ColorData = colorData.ToArray();
+        }
+
+        public void Flip()
+        {
+            ListExtensions.Flip(this.ColorData as IList, Height, Width);
         }
     }
 

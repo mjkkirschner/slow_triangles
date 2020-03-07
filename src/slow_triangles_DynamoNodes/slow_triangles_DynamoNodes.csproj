@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="DynamoVisualProgramming.Core" Version="2.6.0-beta7806" />
     <PackageReference Include="DynamoVisualProgramming.DynamoCoreNodes" Version="2.6.0-beta7806" />
+    <PackageReference Include="DynamoVisualProgramming.WpfUILibrary" Version="2.6.0-beta7806" />
     <PackageReference Include="DynamoVisualProgramming.ZeroTouchLibrary" Version="2.6.0-beta7806" />
   </ItemGroup>
 

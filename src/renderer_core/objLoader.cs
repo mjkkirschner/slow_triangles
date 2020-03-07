@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using renderer.dataStructures;
 using renderer.interfaces;
 using renderer.utilities;
@@ -20,6 +21,11 @@ namespace renderer.core
         public static List<Vector4> LoadVertsFromObjAtPath(FileInfo path)
         {
             var text = File.ReadAllText(path.FullName);
+            //if we are on windows, replace all the mac newlines with windows newlines.
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                text = Regex.Replace(text, @"\r\n?|\n", Environment.NewLine);
+            }
             var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
             var output = new List<Vector4>();
             foreach (var line in lines)
@@ -47,6 +53,11 @@ namespace renderer.core
         public static List<TriangleFace> LoadTrisFromObjAtPath(FileInfo path)
         {
             var text = File.ReadAllText(path.FullName);
+            //if we are on windows, replace all the mac newlines with windows newlines.
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                text = Regex.Replace(text, @"\r\n?|\n", Environment.NewLine);
+            }
             var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
             var output = new List<TriangleFace>();
@@ -99,6 +110,12 @@ namespace renderer.core
             var triFaces = LoadTrisFromObjAtPath(path);
 
             var text = File.ReadAllText(path.FullName);
+            //if we are on windows, replace all the mac newlines with windows newlines.
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                text = Regex.Replace(text, @"\r\n?|\n", Environment.NewLine);
+            }
+           
             var lines = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
 
             var verts = new List<Vector4>();

@@ -57,16 +57,16 @@ namespace slow_triangles.DynamoNodes
             return renderables;
         }
 
-        public static Renderable<Mesh> CreateRenderableObjects2(adsk.Sphere geometryObject, Materials.Material material)
+        public static IEnumerable<Renderable<Mesh>> CreateRenderableObjects(IEnumerable<Mesh> meshes, IEnumerable<Materials.Material> materials)
         {
-
-            //first convert the geometry objects into meshes... this can be done by calling tessellate.
-            var convertedMeshes = ConvertDynamoGeometryToSlowTriMesh(geometryObject);
             //create our renderable objects to associate these meshes with a material/shader setup.
-            return new Renderable<Mesh>(material.InternalMaterial, convertedMeshes);
-
+            var renderables = meshes.Select((mesh, index) =>
+            {
+                var material = materials.ElementAt(index);
+                return new Renderable<Mesh>(material.InternalMaterial, mesh);
+            });
+            return renderables;
         }
-
 
         public static Texture2d Render(Camera camera, IEnumerable<Light> lights, Renderer3dGeneric<Mesh> renderer)
         {
@@ -80,7 +80,9 @@ namespace slow_triangles.DynamoNodes
             );
 
             var data = renderer.Render();
-            return new Texture2d(renderer.Width, renderer.Height, data);
+            var tex = new Texture2d(renderer.Width, renderer.Height, data);
+            tex.Flip();
+            return tex;
         }
 
       

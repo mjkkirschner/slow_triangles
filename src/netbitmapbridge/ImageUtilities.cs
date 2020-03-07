@@ -45,16 +45,18 @@ namespace netbitmapbridge
         /// <returns></returns>
         public static Texture2d BitmapToTexture2d(Bitmap bmp)
         {
+            var cloneBitmap = bmp.Clone() as Bitmap;
+            cloneBitmap.RotateFlip(RotateFlipType.Rotate90FlipX);
 
             var colorData = new List<Color>(); ;
-            for (var x = 0; x < bmp.Width; x++)
+            for (var x = 0; x < cloneBitmap.Width; x++)
             {
-                for (var y = 0; y < bmp.Height; y++)
+                for (var y = 0; y < cloneBitmap.Height; y++)
                 {
-                    colorData.Add(bmp.GetPixel(x, y));
+                    colorData.Add(cloneBitmap.GetPixel(x, y));
                 }
             }
-            return new Texture2d(bmp.Width, bmp.Height, colorData);
+            return new Texture2d(cloneBitmap.Width, cloneBitmap.Height, colorData);
         }
     }
 }

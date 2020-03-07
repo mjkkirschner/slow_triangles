@@ -40,8 +40,8 @@ namespace slow_triangles.DynamoNodes.Materials
 
             var height = pixels.Length;
             var width = pixels[0].Length;
-            //TODO may neeed to transpose first.
-            var colorsFlat = pixels.SelectMany(i => i);
+            var transposed = DSCore.List.Transpose(pixels);
+            var colorsFlat = DSCore.List.Flatten(transposed).Cast<DSCore.Color>();
             var texture = new Texture2d(width, height, colorsFlat.Select(x => Color.FromArgb(x.Alpha, x.Red, x.Green, x.Blue)));
 
             var difMaterial = new DiffuseMaterial()
@@ -57,13 +57,30 @@ namespace slow_triangles.DynamoNodes.Materials
 
         public static DiffuseMaterial ByTexture(Texture2d diffuseMap, [DefaultArgument("null")] object shader)
         {
-            //ugly. and slow.
-            var colorData = meshHelpers.Split<Color>(diffuseMap.ColorData.ToList(), diffuseMap.Width).Select(x => x.Select(y => DSCore.Color.ByARGB(y.A, y.R, y.G, y.B)).ToArray()).ToArray();
-            return DiffuseMaterial.ByColorArray(colorData, shader);
-        }
-        //TODO add constructor with images
+            renderer.dataStructures.Shader realShader;
+            if (shader == null || !(shader is renderer.dataStructures.Shader))
+            {
+                //TODO these parameters of the shader need to be set at render time based on the camera.
+                //use defaults for now.
+                realShader = new renderer.shaders.Unlit_TextureShader(Matrix4x4.Identity, Matrix4x4.Identity, Matrix4x4.Identity);
+            }
+            else
+            {
+                realShader = shader as renderer.dataStructures.Shader;
+            }
 
-        //TODO consider how to set shader on material.
+
+            var difMaterial = new DiffuseMaterial()
+            {
+                InternalMaterial = new renderer.materials.DiffuseMaterial()
+                {
+                    DiffuseTexture = diffuseMap,
+                    Shader = realShader
+                }
+            };
+            return difMaterial;
+        }
+   
     }
 
     public class NormalMaterial : DiffuseMaterial
