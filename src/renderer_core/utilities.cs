@@ -134,6 +134,7 @@ namespace renderer.utilities
             m.M11 = w / 2f;
             m.M22 = h / 2f;
             m.M33 = depthMax / 2f;
+            m.M44 = 1f;
             return m;
 
         }
@@ -262,7 +263,7 @@ namespace renderer.utilities
 
 
         //TODO should probably be Vector4
-        public static void drawTriangle(int triIndex, Vector3[] screenCords, IMaterial material, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
+        public static void drawTriangle(int triIndex, Vector3[] screenCords, IMaterial material, Shader shader, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
         {
             var minx = screenCords.Select(x => x.X).Min();
             var miny = screenCords.Select(x => x.Y).Min();
@@ -294,7 +295,9 @@ namespace renderer.utilities
                                    //only draw if nothing else is closer in the depth buffer and the shader does not ignore this pixel.
                                    //TODO pass in fill color...
                                    Color diffColor = Color.Black;
-                                   if (z < zbuffer[flatIndex] && material.Shader.FragmentToRaster(material, bary, ref diffColor))
+
+
+                                   if (z < zbuffer[flatIndex] && shader.FragmentToRaster(material, bary, ref diffColor))
                                    {
 
                                        imageBuffer[flatIndex] = diffColor;

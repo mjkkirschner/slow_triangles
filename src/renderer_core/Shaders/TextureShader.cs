@@ -235,11 +235,22 @@ namespace renderer.shaders
     public class Single_DirLight_TextureShader : Unlit_TextureShader
     {
         public DirectionalLight uniform_dir_light;
+        public Texture2d uniform_shadow_map;
+        public Matrix4x4 uniform_shadow_light_matrix;
+        public Vector3[] varying_shadowmap_coords;
 
         public Single_DirLight_TextureShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
           : base(viewMatrix, projectionMatrix, viewPort)
         {
+            varying_shadowmap_coords = new Vector3[3];
+        }
 
+        public override Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
+        {
+            var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];
+            var result = base.VertexToFragment(mesh, triangleIndex, vertIndex);
+            varying_shadowmap_coords[vertIndex] = currentVert.ToVector3().ApplyMatrix(uniform_shadow_light_matrix);
+            return result;
         }
 
         public override bool FragmentToRaster(IMaterial mat, Vector3 baryCoords, ref Color color)
@@ -251,23 +262,44 @@ namespace renderer.shaders
             var NormY = varying_normal[0].Y * baryCoords.X + varying_normal[1].Y * baryCoords.Y + varying_normal[2].Y * baryCoords.Z;
             var NormZ = varying_normal[0].Z * baryCoords.X + varying_normal[1].Z * baryCoords.Y + varying_normal[2].Z * baryCoords.Z;
 
+            var shadowx = varying_shadowmap_coords[0].X * baryCoords.X + varying_shadowmap_coords[1].X * baryCoords.Y + varying_shadowmap_coords[2].X * baryCoords.Z;
+            var shadowy = varying_shadowmap_coords[0].Y * baryCoords.X + varying_shadowmap_coords[1].Y * baryCoords.Y + varying_shadowmap_coords[2].Y * baryCoords.Z;
+            var shadowz = varying_shadowmap_coords[0].Z * baryCoords.X + varying_shadowmap_coords[1].Z * baryCoords.Y + varying_shadowmap_coords[2].Z * baryCoords.Z;
+
             var interpolatedUV = new Vector2(U, V);
             var interpolatedNormal = Vector3.Normalize(new Vector3(NormX, NormY, NormZ));
+            var interpolatedShadowCoords = new Vector3(shadowx, shadowy, shadowz);
+
+
+            var shadowval = uniform_shadow_map.GetColorAtUV(new Vector2(interpolatedShadowCoords.X/uniform_shadow_map.Width, 1f-interpolatedShadowCoords.Y/uniform_shadow_map.Width));
+            var shadowIntensity = 1.0f;
+
+            Console.WriteLine(interpolatedShadowCoords);
+            Console.WriteLine(interpolatedShadowCoords.Z);
+            Console.WriteLine(shadowval.R);
+           
+
+            if (shadowval.R/255f < (interpolatedShadowCoords.Z/255f)-.05)
+            {
+                //     Console.WriteLine("IN SHADOW");
+
+                shadowIntensity = .3f;
+            }
 
             var intensity = Math.Min(1.0, Math.Max(0.0, Vector3.Dot(interpolatedNormal, this.uniform_dir_light.Direction)));
 
 
-            var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV);
+            var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV).ToVector3() * shadowIntensity;
             var light = uniform_dir_light;
-            color = calcSingleDirLight_noSpec(mat, interpolatedUV, diffColor, intensity, light, uniform_ambient);
-
+            color = calcSingleDirLight_noSpec(mat, interpolatedUV, diffColor.ToColor(), intensity, light, uniform_ambient);
+           // color = (color.ToVector3() * shadowIntensity).ToColor();
             return true;
         }
     }
 }
 
 
-   
+
 
 
 namespace renderer.materials

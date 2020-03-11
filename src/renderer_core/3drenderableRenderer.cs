@@ -32,9 +32,40 @@ namespace renderer._3d
             this.fillColor = fillColor;
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
-            ShadowMap = Enumerable.Repeat(10000.0, Width * Height).ToArray();
+            ShadowMap = Enumerable.Repeat(Color.White, Width * Height).ToArray();
             this.enableShadowPass = enableShadowPass;
 
+        }
+
+        /// <summary>
+        /// Performs a render pass to the specified output buffer
+        /// </summary>
+        /// <param name="renderable"></param>
+        /// <param name="material"></param>
+        /// <param name="shader">This shader is the one that is used, it takes precedence over the shader on the material - so its best to get the shader from the material and use it here.</param>
+        /// <param name="outputBuffer"></param>
+        /// <returns></returns>
+        private Color[] RenderPass(Renderable<T> renderable, IMaterial material, Shader shader, Color[] outputBuffer)
+        {
+            var triIndex = 0;
+            foreach (var triFace in renderable.RenderableObject.Triangles)
+            {
+                var screenCoords = new List<Vector3>();
+                var localVertIndex = 0;
+
+                foreach (var meshVertInde in triFace.vertIndexList)
+                {
+                    var vect = shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
+                    //TODO do some culling or clipping!
+                    screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
+                    localVertIndex++;
+                }
+                //TODO
+                //use clip information to decide if we should render this tri or skip it:
+                TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, shader, DepthBuffer, outputBuffer, Width);
+                triIndex = triIndex + 1;
+            }
+            return outputBuffer.ToArray();
         }
 
         public Color[] Render()
@@ -42,82 +73,43 @@ namespace renderer._3d
             //cleanup from previous renders
             ImageBuffer = Enumerable.Repeat(fillColor, Width * Height).ToArray();
             DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
-            ShadowMap = Enumerable.Repeat(10000.0, Width * Height).ToArray();
+            ShadowMap = Enumerable.Repeat(Color.White, Width * Height).ToArray();
+
 
             this.Scene.ToList().ForEach(group =>
                group.ToList().ForEach(renderable =>
                {
 
-                 
+
+                   //before rendering the actual camera view, do shadow map pass:
+                   var light = (renderable.material.Shader as Single_DirLight_TextureShader).uniform_dir_light;
+
+                   var view = Matrix4x4.CreateLookAt(light.Direction, Vector3.Zero, Vector3.UnitY);
+                   var proj = light.ShadowProjectionMatrix;
+                   //we need to align this viewport to bound the object and center on the lights position...
+                   var viewport = MatrixExtensions.CreateViewPortMatrix(0,0, 255, Width,Height );
+                   var shadowShader = new ShadowMapGenShader(view, proj, viewport);
+
+                   var mvp = Matrix4x4.Transpose(Matrix4x4.Multiply(view, proj));
+                   var finalShadowMatrix = (Matrix4x4.Multiply(viewport, mvp));
 
 
+                   RenderPass(renderable, renderable.material, shadowShader, ShadowMap);
+                   //reset depth buffer bettween passes
+                   DepthBuffer = Enumerable.Repeat(10000.0, Width * Height).ToArray();
+                   //shadow map should now have a depth image in it.
+                   //a hack! :)
 
-                   //for now only one shader.
-                   var material = renderable.material;
-
-                   //render
-                   var triIndex = 0;
-                   foreach (var triFace in renderable.RenderableObject.Triangles)
-                   {
-                      // Console.WriteLine($"{triIndex} out of {renderable.RenderableObject.Triangles.Count}");
-                       //transform verts to screenspace
-                       var screenCoords = new List<Vector3>();
-                       var localVertIndex = 0;
-                       foreach (var meshVertInde in triFace.vertIndexList)
-                       {
-
-                           //we will render each of our objects for each light to a shadow map that is used inside the 
-                           //regular frag shader pass.
-                           if (enableShadowPass)
-                           {
-                               //TODO
-                               //lets just assume if have a single light for now.
-                               //TODO need to think more about this - do we want to render all our shadow maps first and then access them later
-                               //when rendering?
-
-                               var light = (material.Shader as Single_DirLight_TextureShader).uniform_dir_light;
-
-                               var view = Matrix4x4.CreateLookAt(light.Position, light.Position + light.Direction, Vector3.UnitY);
-                               var proj = light.ShadowProjectionMatrix;
-                               var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, Width, Height);
-                               var shadowShader = new ShadowMapGenShader(view, proj, viewport);
-
-                               var vect_shadowPass = shadowShader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
-                               screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
-
-                               TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, DepthBuffer, ShadowMap, Width);
-                           }
+                   //TODO OH MY _ WHY DO I NEED TO DO THIS.
+                   var shadowTex = new Texture2d(Width, Height, ShadowMap);
+                   //shadowTex.Flip();
+                   (renderable.material.Shader as Single_DirLight_TextureShader).uniform_shadow_map =shadowTex ;
+                   (renderable.material.Shader as Single_DirLight_TextureShader).uniform_shadow_light_matrix = finalShadowMatrix;
+                  //standard pass.
+                  RenderPass(renderable, renderable.material, renderable.material.Shader, ImageBuffer);
 
 
-
-                           var vect = material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
-
-                           //if outside clip bounds, we will mark the vert NAN.
-                           /* if (scaledX < 0 || scaledX > Width || scaledY < 0 || scaledY > Height)
-                            {
-                                screenCoords.Add(new Vector3(float.NaN, float.NaN, float.NaN));
-                            }
-                            else
-                          */
-                           {
-                               screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
-
-                           }
-
-                           localVertIndex++;
-
-                       }
-                       //draw if not nan.
-                       //todo - logic is a bit backward.
-                       //  if (screenCoords.All(x => !float.IsNaN(x.X)))
-                       {
-                           TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, DepthBuffer, ImageBuffer, Width);
-
-                       }
-                       triIndex = triIndex + 1;
-                   }
-               })
-               );
+               }));
 
             return ImageBuffer.ToArray();
         }

@@ -33,15 +33,16 @@ namespace renderer.shaders
 
             //we only care about depth
             //TODO what is the domain of z?
-            var dist = (int)(interpolatedV.Z * 255);
+            var dist = (int)(interpolatedV.Z);
             color = Color.FromArgb(255, dist, dist, dist);
+            
             return true;
         }
 
         public ShadowMapGenShader(Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Matrix4x4 viewPort)
          : base(viewMatrix, projectionMatrix, viewPort)
         {
-           
+           varying_vertex = new Vector3[3];
         }
     }
 

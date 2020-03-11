@@ -47,7 +47,7 @@ namespace renderer._2d
                            localVertIndex++;
                        }
 
-                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, depthBuffer, imageBuffer, Width);
+                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, material.Shader, depthBuffer, imageBuffer, Width);
                        triIndex = triIndex + 1;
                    }
                })
