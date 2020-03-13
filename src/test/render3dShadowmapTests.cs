@@ -26,7 +26,7 @@ namespace Tests
         {
 
             var cameraPos = new Vector3(-2, 5, 1);
-            var target = new Vector3(0, 0, 0);
+            var target = new Vector3(0, 0, 0); 
             var width = 1024;
             var height = 1024;
             var view = Matrix4x4.CreateLookAt(cameraPos, target, Vector3.UnitY);
@@ -34,7 +34,7 @@ namespace Tests
             var viewport = MatrixExtensions.CreateViewPortMatrix(0, 0, 255, width, height);
 
             var mesh = ObjFileLoader.LoadMeshFromObjAtPath(new System.IO.FileInfo("../../../../../geometry_models/shadowmapscene/simplescene2.obj"));
-            var diffuseTex = PNGImage.LoadPNGFromPath("../../../../../geometry_models/shadowmapscene/auvBG.png");
+            var diffuseTex = PNGImage.LoadPNGFromPath("../../../../../textures/testTexture2.png");
 
             var renderable = new Renderable<Mesh>(
                 new DiffuseMaterial()
@@ -42,7 +42,7 @@ namespace Tests
                     Shader = new Single_DirLight_TextureShader(view, proj, viewport)
                     {
                         uniform_ambient = .5f,
-                        uniform_dir_light = new DirectionalLight(new Vector3(1, .1f, 0), true, Color.Red,0.7f),
+                        uniform_dir_light = new DirectionalLight(new Vector3(1, .2f, 0), true, Color.Red,1f),
                     },
                     DiffuseTexture = new Texture2d(diffuseTex.Width, diffuseTex.Height, diffuseTex.Colors)
                 },
@@ -54,7 +54,7 @@ namespace Tests
             image.Colors = renderer.Render();
             var shadowMapImage = new ppmImage(width, height, 255);
             shadowMapImage.Colors = renderer.ShadowMap;
-            
+             
             image.Flip();
             shadowMapImage.Flip();
 

@@ -274,16 +274,12 @@ namespace renderer.shaders
             var shadowval = uniform_shadow_map.GetColorAtUV(new Vector2(interpolatedShadowCoords.X/uniform_shadow_map.Width, 1f-interpolatedShadowCoords.Y/uniform_shadow_map.Width));
             var shadowIntensity = 1.0f;
 
-            Console.WriteLine(interpolatedShadowCoords);
-            Console.WriteLine(interpolatedShadowCoords.Z);
-            Console.WriteLine(shadowval.R);
-           
 
             if (shadowval.R/255f < (interpolatedShadowCoords.Z/255f)-.05)
             {
                 //     Console.WriteLine("IN SHADOW");
 
-                shadowIntensity = .3f;
+                shadowIntensity = .02f;
             }
 
             var intensity = Math.Min(1.0, Math.Max(0.0, Vector3.Dot(interpolatedNormal, this.uniform_dir_light.Direction)));

@@ -1,4 +1,5 @@
 ﻿using renderer.dataStructures;
+using renderer.utilities;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -33,7 +34,7 @@ namespace renderer.shaders
 
             //we only care about depth
             //TODO what is the domain of z?
-            var dist = (int)(interpolatedV.Z);
+            var dist = MathExtensions.Clamp((int)(interpolatedV.Z),0,255);
             color = Color.FromArgb(255, dist, dist, dist);
             
             return true;

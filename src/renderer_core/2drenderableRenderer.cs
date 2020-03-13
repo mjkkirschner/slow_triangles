@@ -46,8 +46,8 @@ namespace renderer._2d
                            screenCoords.Add(material.Shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex));
                            localVertIndex++;
                        }
-
-                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, material.Shader, depthBuffer, imageBuffer, Width);
+                                                                //TODO - just passing in something to get build going.
+                       TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), screenCoords.ToArray(), material, material.Shader, depthBuffer, imageBuffer, Width);
                        triIndex = triIndex + 1;
                    }
                })

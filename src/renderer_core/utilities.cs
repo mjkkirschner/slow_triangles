@@ -94,8 +94,8 @@ namespace renderer.utilities
             var outVector = new Vector3(
                 matrix.M11 * self.X + matrix.M12 * self.Y + matrix.M13 * self.Z + matrix.M14,
                 matrix.M21 * self.X + matrix.M22 * self.Y + matrix.M23 * self.Z + matrix.M24,
-                matrix.M31 * self.X + matrix.M32 * self.Y + matrix.M33 * self.Z + matrix.M34
-            );
+                matrix.M31 * self.X + matrix.M32 * self.Y + matrix.M33 * self.Z + matrix.M34);
+            //   1f / w);
 
             if (w != 1)
             {
@@ -103,7 +103,15 @@ namespace renderer.utilities
                 outVector.Y /= w;
                 outVector.Z /= w;
             }
+
+
             return outVector;
+        }
+
+        //TODO just for testing - remove this.
+        public static float GetW(this Vector3 self, Matrix4x4 matrix)
+        {
+            return matrix.M41 * self.X + matrix.M42 * self.Y + matrix.M43 * self.Z + matrix.M44;
         }
 
         public static Vector3 ToVector3(this Vector4 vec)
@@ -263,7 +271,7 @@ namespace renderer.utilities
 
 
         //TODO should probably be Vector4
-        public static void drawTriangle(int triIndex, Vector3[] screenCords, IMaterial material, Shader shader, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
+        public static void drawTriangle(int triIndex, Vector3[] worldCoords, Vector3[] screenCords, IMaterial material, Shader shader, double[] zbuffer, Color[] imageBuffer, int imageBufferWidth)
         {
             var minx = screenCords.Select(x => x.X).Min();
             var miny = screenCords.Select(x => x.Y).Min();
@@ -273,6 +281,9 @@ namespace renderer.utilities
             var A = screenCords[0];
             var B = screenCords[1];
             var C = screenCords[2];
+            var AWorld = worldCoords[0];
+            var BWorld = worldCoords[1];
+            var CWorld = worldCoords[2];
 
             Enumerable.Range((int)minx, (int)(maxx - minx) + 2).ToList().ForEach(x =>
                    {
@@ -281,10 +292,23 @@ namespace renderer.utilities
                        {
 
                            var IsInsideTriangle = pixelIsInsideTriangle(x, y, screenCords);
-                           var bary = TriangleExtensions.BaryCoordinates2(x, y,
+                           var bary_screen = TriangleExtensions.BaryCoordinates2(x, y,
                                A.ToVector2(), B.ToVector2(), C.ToVector2());
+
+                           var wa = (shader as Base3dShader).removeMe_testing_W(AWorld);
+                           var wb =  (shader as Base3dShader).removeMe_testing_W(BWorld);
+                           var wc =  (shader as Base3dShader).removeMe_testing_W(CWorld);
+                           // System.IO.File.AppendAllText("../../../ShadowMapTest/log.txt", w.ToString("G")+Environment.NewLine);
+
+                           //see https://github.com/ssloy/tinyrenderer/wiki/Technical-difficulties-linear-interpolation-with-perspective-deformations
+                           // https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/perspective-correct-interpolation-vertex-attributes
+                           // https://stackoverflow.com/questions/24441631/how-exactly-does-opengl-do-perspectively-correct-linear-interpolation
+                           //get the clip coordinates solve for world space bary coords
+                           Vector3 bary_clip = new Vector3(bary_screen.X / wa, bary_screen.Y / wb, bary_screen.Z / wc);
+                           bary_clip = bary_clip / (bary_clip.X + bary_clip.Y + bary_clip.Z);
+
                            //compute the depth of current pixel.
-                           var z = bary.X * A.Z + bary.Y * B.Z + bary.Z * C.Z;
+                           var z = bary_screen.X * A.Z + bary_screen.Y * B.Z + bary_screen.Z * C.Z;
                            if (IsInsideTriangle)
                            {
                                var flatIndex = imageBufferWidth * (int)y + (int)x;
@@ -297,7 +321,7 @@ namespace renderer.utilities
                                    Color diffColor = Color.Black;
 
 
-                                   if (z < zbuffer[flatIndex] && shader.FragmentToRaster(material, bary, ref diffColor))
+                                   if (z < zbuffer[flatIndex] && shader.FragmentToRaster(material, bary_clip, ref diffColor))
                                    {
 
                                        imageBuffer[flatIndex] = diffColor;

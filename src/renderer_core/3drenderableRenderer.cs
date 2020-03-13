@@ -51,18 +51,22 @@ namespace renderer._3d
             foreach (var triFace in renderable.RenderableObject.Triangles)
             {
                 var screenCoords = new List<Vector3>();
+                 var worldCoords = new List<Vector3>();
                 var localVertIndex = 0;
 
                 foreach (var meshVertInde in triFace.vertIndexList)
                 {
+                    var mesh = renderable.RenderableObject;
+                    var currentWorldVert = mesh.VertexData[mesh.Triangles[triIndex].vertIndexList[localVertIndex] - 1];
                     var vect = shader.VertexToFragment(renderable.RenderableObject, triIndex, localVertIndex);
                     //TODO do some culling or clipping!
                     screenCoords.Add(new Vector3(vect.X, vect.Y, vect.Z));
+                    worldCoords.Add(currentWorldVert.ToVector3());
                     localVertIndex++;
                 }
                 //TODO
                 //use clip information to decide if we should render this tri or skip it:
-                TriangleExtensions.drawTriangle(triIndex, screenCoords.ToArray(), material, shader, DepthBuffer, outputBuffer, Width);
+                TriangleExtensions.drawTriangle(triIndex, worldCoords.ToArray(), screenCoords.ToArray(), material, shader, DepthBuffer, outputBuffer, Width);
                 triIndex = triIndex + 1;
             }
             return outputBuffer.ToArray();
@@ -100,9 +104,8 @@ namespace renderer._3d
                    //shadow map should now have a depth image in it.
                    //a hack! :)
 
-                   //TODO OH MY _ WHY DO I NEED TO DO THIS.
+                  
                    var shadowTex = new Texture2d(Width, Height, ShadowMap);
-                   //shadowTex.Flip();
                    (renderable.material.Shader as Single_DirLight_TextureShader).uniform_shadow_map =shadowTex ;
                    (renderable.material.Shader as Single_DirLight_TextureShader).uniform_shadow_light_matrix = finalShadowMatrix;
                   //standard pass.

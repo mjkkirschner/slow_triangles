@@ -41,7 +41,7 @@ namespace renderer_core.dataStructures
         {
             this.Direction = direction;
             //TODO this is just random.
-            ShadowProjectionMatrix = Matrix4x4.CreateOrthographic(10, 10, 1, 5);
+            ShadowProjectionMatrix = Matrix4x4.CreateOrthographic(5, 5, 1, 5);
            this.Position =  Vector3.Multiply(this.Direction,2) + this.Position;  
         }
     }

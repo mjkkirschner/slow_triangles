@@ -115,7 +115,7 @@ namespace renderer.dataStructures
 
             var x = UV.X * Width;
             var y = (1.0f - UV.Y) * Height;
-            var index = MathExtensions.Clamp<int>(Width * (int)y + (int)x, 0, (Width * Height)-1);
+            var index = MathExtensions.Clamp<int>(Width * (int)y + (int)x, 0, (Width * Height) - 1);
             return ColorData[index];
         }
 
@@ -162,6 +162,13 @@ namespace renderer.dataStructures
             return vert.ApplyMatrix(final);
         }
 
+        public float removeMe_testing_W(Vector3 vect)
+        {
+            var mvp = Matrix4x4.Transpose(Matrix4x4.Multiply(ViewModelMatrix, ProjectionMatrix));
+            var final = Matrix4x4.Multiply(ViewportMatrix, mvp);
+            return vect.GetW(final);
+        }
+
         //TODO consider moving to shader utilities.
         protected Color calcSingleDirLight_noSpec(IMaterial mat, Vector2 interpolatedUV, Color diffColor, double intensity, DirectionalLight light, float uniform_ambient)
         {
@@ -185,7 +192,7 @@ namespace renderer.dataStructures
     /// </summary>
     public class Shader
     {
-       
+
         public virtual Vector3 VertexToFragment(Mesh mesh, int triangleIndex, int vertIndex)
         {
             var currentVert = mesh.VertexData[mesh.Triangles[triangleIndex].vertIndexList[vertIndex] - 1];
@@ -209,7 +216,7 @@ namespace renderer.dataStructures
 
     //TODO currently, has no use, will be used to set specific maps and parameters for a specified shader.
     //potentially can use reflection or description objects.
-    public class Material:IMaterial
+    public class Material : IMaterial
     {
         public Shader Shader { get; set; }
     }
