@@ -182,6 +182,55 @@ namespace renderer.dataStructures
             return (colIntermediate.ToVector3() + ambientTerm).ToColor();
         }
 
+        protected static Vector3 reflect(Vector3 vector, Vector3 normal)
+        {
+            return Vector3.Normalize(vector - normal * (normal * vector * 2.0f));
+        }
+
+        protected static (double, double) ConvertCartesianToSphericalCoords(Vector3 cartesianCoords)
+        {
+            var xysq = (cartesianCoords.X * cartesianCoords.X) +
+            (cartesianCoords.Y * cartesianCoords.Y);
+            var theta = System.Math.Atan2(cartesianCoords.Z, Math.Sqrt(xysq)); //elevation
+            var denom = System.Math.Sqrt(
+               xysq +
+            (cartesianCoords.Z * cartesianCoords.Z));
+            var phi = System.Math.Atan2(cartesianCoords.Y, cartesianCoords.X); //azimuth
+            //lat,long
+            return (theta, phi);
+        }
+
+        protected static (double, double) ConvertCartesianToSphericalCoords2(Vector3 cartesianCoords)
+        {
+            var theta = cartesianCoords.Z;
+            var phi = Math.Atan2(cartesianCoords.Y, cartesianCoords.X);
+            return (theta, phi);
+        }
+
+        protected static (double, double) ConvertCartesianToSphericalCoords3(Vector3 cartesianCoords)
+        {
+            var theta = cartesianCoords.X * Math.PI;
+            var phi = Math.Asin(cartesianCoords.Y);
+            return (theta, phi);
+        }
+
+        protected static (double, double) ConvertCartesianToSphericalCoords4(Vector3 cartesianCoords)
+        {
+            var theta = Math.Acos(-cartesianCoords.Y / cartesianCoords.Length());
+            var phi = Math.Atan2(cartesianCoords.X, -cartesianCoords.Z);
+            return (theta, phi);
+        }
+
+        //https://stackoverflow.com/questions/47819607/convert-cubemap-coordinates-to-equivalents-in-equirectangular
+        protected static Vector2 convertVector3ToEquirectangularUVCoords(Vector3 vector, Texture2d tex)
+        {
+            var (theta, phi) = ConvertCartesianToSphericalCoords4(vector);
+            var U = .5f + phi / (Math.PI * 2f);
+            var V = theta / Math.PI;
+
+            return new Vector2((float)U, (float)V);
+        }
+
     }
 
     //TODO this type likely to be replaced after implementing materials/shaders / materialMeshes.

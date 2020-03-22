@@ -74,6 +74,18 @@ namespace renderer.utilities
             return new Vector3(vec.X, vec.Y, Z);
         }
 
+        public static float Lerp(float start, float end, float t)
+        {
+            return start * (1 - t) + end * t;
+        }
+        public static Vector3 Lerp(Vector3 start, Vector3 end, float t)
+        {
+            return new Vector3(
+                Lerp(start.X, end.X, t),
+                Lerp(start.Y, end.Y, t),
+                Lerp(start.Z, end.Z, t));
+        }
+
         public static Color ToColor(this Vector3 vec)
         {
             //clamp these values
@@ -296,8 +308,8 @@ namespace renderer.utilities
                                A.ToVector2(), B.ToVector2(), C.ToVector2());
 
                            var wa = (shader as Base3dShader).removeMe_testing_W(AWorld);
-                           var wb =  (shader as Base3dShader).removeMe_testing_W(BWorld);
-                           var wc =  (shader as Base3dShader).removeMe_testing_W(CWorld);
+                           var wb = (shader as Base3dShader).removeMe_testing_W(BWorld);
+                           var wc = (shader as Base3dShader).removeMe_testing_W(CWorld);
                            // System.IO.File.AppendAllText("../../../ShadowMapTest/log.txt", w.ToString("G")+Environment.NewLine);
 
                            //see https://github.com/ssloy/tinyrenderer/wiki/Technical-difficulties-linear-interpolation-with-perspective-deformations

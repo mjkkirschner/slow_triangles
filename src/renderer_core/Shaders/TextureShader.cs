@@ -128,10 +128,7 @@ namespace renderer.shaders
 
             }
 
-            Vector3 reflect(Vector3 vector, Vector3 normal)
-            {
-                return Vector3.Normalize(vector - normal * (normal * vector * 2.0f));
-            }
+
 
             var U = varying_UVCoord[0].X * baryCoords.X + varying_UVCoord[1].X * baryCoords.Y + varying_UVCoord[2].X * baryCoords.Z;
             var V = varying_UVCoord[0].Y * baryCoords.X + varying_UVCoord[1].Y * baryCoords.Y + varying_UVCoord[2].Y * baryCoords.Z;
@@ -271,11 +268,11 @@ namespace renderer.shaders
             var interpolatedShadowCoords = new Vector3(shadowx, shadowy, shadowz);
 
 
-            var shadowval = uniform_shadow_map.GetColorAtUV(new Vector2(interpolatedShadowCoords.X/uniform_shadow_map.Width, 1f-interpolatedShadowCoords.Y/uniform_shadow_map.Width));
+            var shadowval = uniform_shadow_map.GetColorAtUV(new Vector2(interpolatedShadowCoords.X / uniform_shadow_map.Width, 1f - interpolatedShadowCoords.Y / uniform_shadow_map.Width));
             var shadowIntensity = 1.0f;
 
 
-            if (shadowval.R/255f < (interpolatedShadowCoords.Z/255f)-.05)
+            if (shadowval.R / 255f < (interpolatedShadowCoords.Z / 255f) - .05)
             {
                 //     Console.WriteLine("IN SHADOW");
 
@@ -288,7 +285,7 @@ namespace renderer.shaders
             var diffColor = (mat as DiffuseMaterial).DiffuseTexture.GetColorAtUV(interpolatedUV).ToVector3() * shadowIntensity;
             var light = uniform_dir_light;
             color = calcSingleDirLight_noSpec(mat, interpolatedUV, diffColor.ToColor(), intensity, light, uniform_ambient);
-           // color = (color.ToVector3() * shadowIntensity).ToColor();
+            // color = (color.ToVector3() * shadowIntensity).ToColor();
             return true;
         }
     }
@@ -300,6 +297,17 @@ namespace renderer.shaders
 
 namespace renderer.materials
 {
+
+    public class ImageBasedLightMaterial : DiffuseMaterial
+    {
+        public Texture2d LightTexture { get; set; }
+    }
+
+    public class SkyBoxMaterial : ImageBasedLightMaterial
+    {
+
+    }
+
     public class DiffuseMaterial : Material
     {
         public Texture2d DiffuseTexture;
